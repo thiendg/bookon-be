@@ -1,0 +1,76 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Set the base directory
+RewriteBase /bookon/bookon-be/
+
+# Prevent directory browsing
+# Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect config files
+<FilesMatch "(database\.php|config\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Enable CORS for API requests (alternative to cors.php)
+# Header set Access-Control-Allow-Origin "http://localhost:3002"
+# Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+# Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+# Header set Access-Control-Allow-Credentials "true"
+
+# Force HTTPS (enable this in production)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Remove .php extension (optional - for cleaner URLs)
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteCond %{REQUEST_FILENAME}\.php -f
+# RewriteRule ^(.*)$ $1.php [L]
+
+# Custom error pages (optional)
+# ErrorDocument 404 /backend/errors/404.php
+# ErrorDocument 500 /backend/errors/500.php
+
+# Prevent access to sensitive directories
+RedirectMatch 403 ^/backend/config/
+RedirectMatch 403 ^/backend/models/
+RedirectMatch 403 ^/backend/utils/
+
+# Allow only API access
+<IfModule mod_rewrite.c>
+    # Allow access to modules/*/api/ directories
+    RewriteCond %{REQUEST_URI} !^/backend/modules/.*/api/.*\.php$
+    RewriteCond %{REQUEST_URI} ^/backend/modules/
+    RewriteRule ^(.*)$ - [F,L]
+</IfModule>
+
+# PHP settings
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>
+
+# Compression (optional - improves performance)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Browser caching (optional)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType application/json "access plus 0 seconds"
+</IfModule>
