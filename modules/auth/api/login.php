@@ -9,11 +9,11 @@ header('Content-Type: application/json');
 // Include required files
 require_once __DIR__ . '/../../../utils/cors.php';
 require_once __DIR__ . '/../../../utils/response.php';
-require_once __DIR__ . '/../../../utils/app_session.php';
-require_once __DIR__ . '/../../../config/database.php';
-require_once __DIR__ . '/../models/User.php';
-require_once __DIR__ . '/../models/Session.php';
-require_once __DIR__ . '/../models/PersistentLogin.php';
+require_once __DIR__ . '/../../../utils/app-session.php'; // Renamed
+require_once __DIR__ . '/../../users/models/user.php'; // BaseModel-based UserModel
+require_once __DIR__ . '/../../sessions/models/session.php'; // BaseModel-based SessionModel
+require_once __DIR__ . '/../models/persistent-login.php'; // BaseModel-based PersistentLoginModel
+require_once __DIR__ . '/../../../utils/token_generator.php'; // For persistent login token handling
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -21,16 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Get posted data
-$data = json_decode(file_get_contents("php://input"));
+$data = json_decode(file_get_contents("php://input"), true);
 
 // Validate input
 $errors = [];
 
-if (empty($data->email)) {
+if (empty($data['email'])) {
     $errors['email'] = 'Email is required';
 }
 
-if (empty($data->password)) {
+if (empty($data['password'])) {
     $errors['password'] = 'Password is required';
 }
 
@@ -38,52 +38,39 @@ if (!empty($errors)) {
     Response::validationError($errors);
 }
 
-// Initialize database connection
-$database = new Database();
-$db = $database->getConnection();
-
 // Initialize models
-$user = new User($db);
-$sessionModel = new Session($db);
-$persistentLogin = new PersistentLogin($db);
+$userModel = new UserModel();
+$sessionModel = new SessionModel(); // Not directly used here, but for consistency
+$persistentLoginModel = new PersistentLoginModel();
 
 // Find user by email
-if (!$user->findByEmail($data->email)) {
-    Response::error('Invalid email or password', 401);
-}
+$user = $userModel->findOne(['email' => $data['email']]);
 
-// Verify password
-if (!$user->verifyPassword($data->password)) {
+if (!$user || !password_verify($data['password'], $user['password_hash'])) {
     Response::error('Invalid email or password', 401);
 }
 
 // Check if email is verified
-if (!$user->isEmailVerified()) {
+if ($user['status'] !== 'active') {
     Response::error('Please verify your email before logging in', 403);
 }
 
 // Start session
 AppSession::start();
 AppSession::regenerate();
-AppSession::setUser($user->id, $user->toArray());
-
-// Save session to database
-$sessionModel->session_id = session_id();
-$sessionModel->user_id = $user->id;
-$sessionModel->ip_address = AppSession::getClientIp();
-$sessionModel->user_agent = AppSession::getUserAgent();
-$sessionModel->payload = json_encode($_SESSION);
-$sessionModel->last_activity = time();
-$sessionModel->save();
+AppSession::setUser($user['id'], [
+    'email' => $user['email'],
+    'name' => $user['full_name']
+]);
 
 $responseData = [
-    'user' => $user->toArray(),
+    'user' => $user, // User data from UserModel
     'session_id' => session_id()
 ];
 
 // Handle "Remember Me" functionality
-if (isset($data->remember_me) && $data->remember_me === true) {
-    $token = $persistentLogin->generateToken($user->id);
+if (isset($data['remember_me']) && $data['remember_me'] === true) {
+    $token = $persistentLoginModel->generateToken($user['id']);
     
     if ($token) {
         // Set persistent login cookie (30 days)
@@ -91,7 +78,7 @@ if (isset($data->remember_me) && $data->remember_me === true) {
             'remember_token',
             $token,
             [
-                'expires' => time() + PersistentLogin::EXPIRY_TIME,
+                'expires' => time() + PersistentLoginModel::EXPIRY_TIME,
                 'path' => '/',
                 'domain' => '',
                 'secure' => false, // Set to true in production with HTTPS

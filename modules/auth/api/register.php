@@ -9,9 +9,10 @@ header('Content-Type: application/json');
 // Include required files
 require_once __DIR__ . '/../../../utils/cors.php';
 require_once __DIR__ . '/../../../utils/response.php';
-require_once __DIR__ . '/../../../config/database.php';
-require_once __DIR__ . '/../models/User.php';
-require_once __DIR__ . '/../models/UserToken.php';
+require_once __DIR__ . '/../../users/models/user.php'; // BaseModel-based UserModel
+require_once __DIR__ . '/../../user_tokens/models/user-token.php'; // BaseModel-based UserTokenModel
+require_once __DIR__ . '/../../../utils/email-sender.php'; // Email sending utility
+require_once __DIR__ . '/../../../utils/template-loader.php'; // Template loading utility
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -19,69 +20,101 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Get posted data
-$data = json_decode(file_get_contents("php://input"));
+$data = json_decode(file_get_contents("php://input"), true);
 
 // Validate input
 $errors = [];
 
-if (empty($data->email)) {
+if (empty($data['email'])) {
     $errors['email'] = 'Email is required';
-} elseif (!filter_var($data->email, FILTER_VALIDATE_EMAIL)) {
+} elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
     $errors['email'] = 'Invalid email format';
 }
 
-if (empty($data->password)) {
+if (empty($data['password'])) {
     $errors['password'] = 'Password is required';
-} elseif (strlen($data->password) < 8) {
+} elseif (strlen($data['password']) < 8) {
     $errors['password'] = 'Password must be at least 8 characters';
 }
 
-if (empty($data->name)) {
-    $errors['name'] = 'Name is required';
+if (empty($data['full_name'])) {
+    $errors['full_name'] = 'Name is required';
 }
 
 if (!empty($errors)) {
     Response::validationError($errors);
 }
 
-// Initialize database connection
-$database = new Database();
-$db = $database->getConnection();
-
 // Initialize models
-$user = new User($db);
-$userToken = new UserToken($db);
+$userModel = new UserModel();
+$userTokenModel = new UserTokenModel();
 
 // Check if email already exists
-if ($user->emailExists($data->email)) {
+if ($userModel->findOne(['email' => $data['email']])) {
     Response::error('Email already registered', 409);
 }
 
-// Set user properties
-$user->email = $data->email;
-$user->password_hash = $data->password;
-$user->full_name = $data->name;
-$user->status = 'unverified'; // Default status
-$user->avatar_url = 'default_avatar.png'; // Default avatar
-$user->role_id = null; // or set to default role ID
-$user->phone_number = null;
-$user->address = null;
+// Prepare user data for creation
+$userData = [
+    'email' => $data['email'],
+    'password' => $data['password'], // UserModel will hash this
+    'full_name' => $data['full_name'],
+    'status' => 'unverified', // Default status
+    'avatar_url' => 'default_avatar.png', // Default avatar
+    'role_id' => $data['role_id'] ?? null, // Allow setting role_id if provided, otherwise null
+    'phone_number' => $data['phone_number'] ?? null,
+    'address' => $data['address'] ?? null,
+];
 
 // Create user
-if ($user->create()) {
+if ($userModel->create($userData)) {
+    // Get the newly created user's ID
+    $newUser = $userModel->findOne(['email' => $data['email']]);
+    if (!$newUser) {
+        Response::error('Failed to retrieve new user data after creation.', 500);
+    }
+
     // Generate email verification token
-    $token = $userToken->generateEmailVerificationToken($user->id);
+    $token = $userTokenModel->createToken($newUser['id'], 'email_verification');
     
     if ($token) {
-        // TODO: Send email with verification link
-        // For now, we'll return the token in response (remove this in production)
-        // $verificationLink = "http://localhost:3000/verify-email?token=" . $token;
-        // sendEmail($user->email, $verificationLink);
+        // Load APP_BASE_URL from environment
+        if (!isset($_ENV['APP_BASE_URL'])) {
+            require_once __DIR__ . '/../../../utils/env-loader.php';
+            loadEnv(__DIR__ . '/../../../.env');
+        }
+        $appBaseUrl = $_ENV['APP_BASE_URL'] ?? 'http://localhost'; // Fallback
+
+        $verificationLink = $appBaseUrl . '/modules/auth/api/verify-email.php?token=' . $token;
         
-        Response::success([
-            'user' => $user->toArray(),
-            'verification_token' => $token  // Remove after send email
-        ], 'Registration successful. Please check your email to verify your account.', 201);
+        // Prepare data for template
+        $templateData = [
+            'user_name' => $newUser['full_name'],
+            'action_link' => $verificationLink,
+            'token' => $token
+        ];
+
+        // Load and process email template
+        try {
+            $templateHtml = loadTemplate(__DIR__ . '/../../../templates/emails/verification-email.html', $templateData);
+            $templateText = loadTemplate(__DIR__ . '/../../../templates/emails/verification-email.txt', $templateData);
+        } catch (Exception $e) {
+            error_log("Failed to load verification email template: " . $e->getMessage());
+            Response::error("Registration successful, but failed to load email template.", 500);
+        }
+        
+        // Send email
+        $emailSentResult = sendEmail($newUser['email'], 'Verify Your Email Address', $templateHtml, $templateText);
+
+        if ($emailSentResult === true) {
+            Response::success([
+                'user' => $newUser
+            ], 'Registration successful. Please check your email to verify your account.', 201);
+        } else {
+            // If email sending fails, report the specific error
+            error_log("Failed to send verification email to {$newUser['email']}. Error: {$emailSentResult}");
+            Response::error("Registration successful, but failed to send verification email. Error: {$emailSentResult}", 500);
+        }
     } else {
         Response::error('Failed to generate verification token', 500);
     }

@@ -1,0 +1,448 @@
+{
+	"info": {
+		"_postman_id": "YOUR_POSTMAN_COLLECTION_ID",
+		"name": "BookOn API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_collection_id": "YOUR_POSTMAN_COLLECTION_ID"
+	},
+	"item": [
+		{
+			"name": "Auth Module",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\",\n    \"full_name\": \"Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/register.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"register.php"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"full_name\": \"Test User\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/modules/auth/api/register.php",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										"auth",
+										"api",
+										"register.php"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Registration successful. Please check your email to verify your account.\",\n    \"data\": {\n        \"user\": {\n            \"id\": \"1\",\n            \"email\": \"test@example.com\",\n            \"full_name\": \"Test User\",\n            \"status\": \"unverified\",\n            \"avatar_url\": \"default_avatar.png\",\n            \"role_id\": null,\n            \"phone_number\": null,\n            \"address\": null,\n            \"created_at\": \"1678886400\",\n            \"updated_at\": \"1678886400\"\n        },\n        \"verification_token\": \"some_verification_token\"\n    }\n}"
+						}
+					],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.verification_token) {",
+									"    pm.collectionVariables.set(\"verificationToken\", jsonData.data.verification_token);",
+									"    console.log(\"Verification Token: \" + pm.collectionVariables.get(\"verificationToken\"));",
+								"}"
+							],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/verify-email.php?token={{verificationToken}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"verify-email.php"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{verificationToken}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Verification Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/resend-verification.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"resend-verification.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\",\n    \"remember_me\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/login.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"login.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.remember_token) {",
+									"    pm.collectionVariables.set(\"rememberToken\", jsonData.data.remember_token);",
+									"    console.log(\"Remember Token: \" + pm.collectionVariables.get(\"rememberToken\"));",
+								"}"
+							],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Check Auth Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/check-auth.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"check-auth.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/forgot-password.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"forgot-password.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.reset_token) {",
+									"    pm.collectionVariables.set(\"resetToken\", jsonData.data.reset_token);",
+									"    console.log(\"Reset Token: \" + pm.collectionVariables.get(\"resetToken\"));",
+								"}"
+							],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{resetToken}}\",\n    \"password\": \"{{newPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/reset-password.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"reset-password.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/logout.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"logout.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users Module (Authenticated)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/users/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"users",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles Module (Authenticated)",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/roles/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"roles",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Files Module",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/image.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/files/api/upload.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"files",
+								"api",
+								"upload.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost/bookon-be",
+			"type": "string"
+		},
+		{
+			"key": "userEmail",
+			"value": "testuser@example.com",
+			"type": "string"
+		},
+		{
+			"key": "userPassword",
+			"value": "password123",
+			"type": "string"
+		},
+		{
+			"key": "newPassword",
+			"value": "newpassword123",
+			"type": "string"
+		},
+		{
+			"key": "verificationToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "resetToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

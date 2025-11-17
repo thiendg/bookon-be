@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 80%; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .button { display: inline-block; padding: 10px 20px; margin-top: 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Email Verification</h2>
+        <p>Hello {{user_name}},</p>
+        <p>Thank you for registering with BookOn. Please click the button below to verify your email address:</p>
+        <p>
+            <a href="{{action_link}}" class="button">Verify Your Email</a>
+        </p>
+        <p>If the button above does not work, please copy and paste the following link into your web browser:</p>
+        <p><a href="{{action_link}}">{{action_link}}</a></p>
+        <p>Alternatively, you can manually enter the verification token: <strong>{{token}}</strong></p>
+        <p>This link will expire in 24 hours.</p>
+        <p>If you did not register for an account, please ignore this email.</p>
+        <p>Regards,<br>The BookOn Team</p>
+    </div>
+</body>
+</html>

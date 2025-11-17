@@ -4,6 +4,8 @@
  * Manages PHP sessions and authentication state
  */
 
+require_once __DIR__ . '/database-session-handler.php';
+
 class AppSession {
     
     /**
@@ -11,7 +13,7 @@ class AppSession {
      */
     public static function start() {
         if (session_status() === PHP_SESSION_NONE) {
-            // Secure session configuration
+            // Secure session configuration - these should ideally be in php.ini or a central config
             ini_set('session.cookie_httponly', 1);
             ini_set('session.use_only_cookies', 1);
             ini_set('session.cookie_samesite', 'Lax');
@@ -19,6 +21,10 @@ class AppSession {
             // For production, enable this:
             // ini_set('session.cookie_secure', 1);
             
+            // Register custom session handler
+            $handler = new DatabaseSessionHandler();
+            session_set_save_handler($handler, true);
+
             session_start();
         }
     }
