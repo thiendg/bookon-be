@@ -55,6 +55,9 @@ if ($user['status'] !== 'active') {
     Response::error('Please verify your email before logging in', 403);
 }
 
+// Remove password hash before sending user data in response
+unset($user['password_hash']);
+
 // Start session
 AppSession::start();
 AppSession::regenerate();

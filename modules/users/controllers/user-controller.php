@@ -40,6 +40,12 @@ class UserController
         // Call the new method that includes role name
         $result = $this->userModel->getUsersWithRoleName($page, $pageSize, $filters, $orderBy);
 
+        // Remove password_hash from each user object
+        foreach ($result['data'] as &$user) {
+            unset($user['password_hash']);
+        }
+        unset($user); // Unset reference to last element
+
         Response::success($result);
     }
 
@@ -57,6 +63,7 @@ class UserController
         $user = $this->userModel->findUserWithRole($id);
 
         if ($user) {
+            unset($user['password_hash']); // Remove password hash
             Response::success($user);
         } else {
             Response::notFound('User not found');

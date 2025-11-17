@@ -55,6 +55,7 @@ if ($user['status'] === 'active') {
 if ($userModel->update($userId, ['status' => 'active'])) {
     // Fetch updated user data for response
     $updatedUser = $userModel->find($userId);
+    unset($updatedUser['password_hash']); // Remove password hash
     Response::success([
         'user' => $updatedUser
     ], 'Email verified successfully');
