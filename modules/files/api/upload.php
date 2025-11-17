@@ -1,7 +1,7 @@
 <?php
 /**
  * File Upload API
- * Handles uploading of files (e.g., avatars, product images)
+ * Handles uploading of files (e.g., avatars, book images)
  */
 
 header('Content-Type: application/json');

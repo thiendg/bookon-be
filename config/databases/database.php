@@ -18,7 +18,7 @@ class Database
             $ssl_ca = __DIR__ . '/CA_certificate/ca.pem';
 
             if (!$host || !$db_name || !$username || !$password || !$port) {
-                 die(json_encode([
+                die(json_encode([
                     'success' => false,
                     'message' => 'Database environment variables are not set correctly.'
                 ]));

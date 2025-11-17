@@ -54,9 +54,7 @@ class UserController
             return;
         }
         
-        // For a single user, we can also join to get the role name
-        $user = $this->userModel->getUsersWithRoleName(1, 1, ['id' => $id]); // Use getUsersWithRoleName for single user too
-        $user = $user['data'][0] ?? null; // Extract the single user from the paginated result
+        $user = $this->userModel->findUserWithRole($id);
 
         if ($user) {
             Response::success($user);

@@ -47,6 +47,24 @@ class UserModel extends BaseModel
     }
 
     /**
+     * Fetches a single user by ID including their role name.
+     * @param int $id The ID of the user to fetch.
+     * @return array|null An associative array representing the user, or null if not found.
+     */
+    public function findUserWithRole($id)
+    {
+        $sql = "SELECT users.*, roles.name AS role_name 
+                FROM users 
+                LEFT JOIN roles ON users.role_id = roles.id 
+                WHERE users.id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
+    /**
      * Fetches a paginated list of users including their role name.
      * @param int $page The current page number (1-indexed).
      * @param int $pageSize The number of records per page.
