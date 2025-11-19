@@ -1,7 +1,7 @@
 <?php
 /**
- * Forgot Password API
- * Generates password reset token and sends email
+ * Resend Verification API
+ * Generates a new email verification token and sends it to the user
  */
 
 header('Content-Type: application/json');
@@ -40,11 +40,19 @@ $user = $userModel->findOne(['email' => $data['email']]);
 
 if (!$user) {
     // Don't reveal if email exists - return success anyway
-    Response::success(null, 'If your email is registered, you will receive a password reset link');
+    Response::success(null, 'If your email is registered and unverified, a new verification email will be sent.');
 }
 
-// Generate password reset token
-$token = $userTokenModel->createToken($user['id'], 'password_reset');
+// Check if user is already verified
+if ($user['status'] === 'active') {
+    Response::success(null, 'Your email is already verified.');
+}
+
+// Invalidate any existing verification tokens for this user
+$userTokenModel->deleteWhere(['user_id' => $user['id'], 'type' => 'email_verification']);
+
+// Generate a new email verification token
+$token = $userTokenModel->createToken($user['id'], 'email_verification');
 
 if ($token) {
     // Load APP_BASE_URL from environment
@@ -54,35 +62,35 @@ if ($token) {
     }
     $appBaseUrl = $_ENV['APP_BASE_URL'] ?? 'http://localhost'; // Fallback
 
-    $resetLink = $appBaseUrl . '/modules/auth/api/reset-password.php?token=' . $token; // Assuming a frontend route for reset
+    $verificationLink = $appBaseUrl . '/modules/auth/api/verify-email.php?token=' . $token;
     
     // Prepare data for template
     $templateData = [
         'user_name' => $user['full_name'],
-        'action_link' => $resetLink,
+        'action_link' => $verificationLink,
         'token' => $token
     ];
 
-    // Load and process email template
+    // Load and process email templates
     try {
-        $templateHtml = loadTemplate(__DIR__ . '/../../../templates/emails/reset-password-email.html', $templateData);
-        $templateText = loadTemplate(__DIR__ . '/../../../templates/emails/reset-password-email.txt', $templateData);
+        $templateHtml = loadTemplate(__DIR__ . '/../../../templates/emails/verification-email.html', $templateData);
+        $templateText = loadTemplate(__DIR__ . '/../../../templates/emails/verification-email.txt', $templateData);
     } catch (Exception $e) {
-        error_log("Failed to load reset password email template: " . $e->getMessage());
-        Response::error("If your email is registered, you will receive a password reset link (failed to load email template).", 500);
+        error_log("Failed to load verification email template: " . $e->getMessage());
+        Response::error("Failed to send verification email (template error).", 500);
     }
 
     // Send email
-    $emailSentResult = sendEmail($user['email'], 'Password Reset Request', $templateHtml, $templateText);
+    $emailSentResult = sendEmail($user['email'], 'Verify Your Email Address', $templateHtml, $templateText);
 
     if ($emailSentResult === true) {
-        Response::success(null, 'If your email is registered, you will receive a password reset link');
+        Response::success(null, 'A new verification email has been sent to your address.');
     } else {
         // If email sending fails, report the specific error
-        error_log("Failed to send password reset email to {$user['email']}. Error: {$emailSentResult}");
-        Response::error("If your email is registered, you will receive a password reset link (email sending failed). Error: {$emailSentResult}", 500);
+        error_log("Failed to send verification email to {$user['email']}. Error: {$emailSentResult}");
+        Response::error("Failed to send verification email. Error: {$emailSentResult}", 500);
     }
 } else {
-    Response::error('Failed to generate reset token', 500);
+    Response::error('Failed to generate verification token', 500);
 }
 ?>

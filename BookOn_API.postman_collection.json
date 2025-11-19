@@ -1,0 +1,2114 @@
+{
+	"info": {
+		"_postman_id": "YOUR_POSTMAN_COLLECTION_ID",
+		"name": "BookOn API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_collection_id": "YOUR_POSTMAN_COLLECTION_ID"
+	},
+	"item": [
+		{
+			"name": "Auth Module",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\",\n    \"full_name\": \"Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/register.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"register.php"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"full_name\": \"Test User\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/modules/auth/api/register.php",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										"auth",
+										"api",
+										"register.php"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Registration successful. Please check your email to verify your account.\",\n    \"data\": {\n        \"user\": {\n            \"id\": \"1\",\n            \"email\": \"test@example.com\",\n            \"full_name\": \"Test User\",\n            \"status\": \"unverified\",\n            \"avatar_url\": \"default_avatar.png\",\n            \"role_id\": null,\n            \"phone_number\": null,\n            \"address\": null,\n            \"created_at\": \"1678886400\",\n            \"updated_at\": \"1678886400\"\n        },\n        \"verification_token\": \"some_verification_token\"\n    }"
+						}
+					],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.verification_token) {",
+									"    pm.collectionVariables.set(\"verificationToken\", jsonData.data.verification_token);",
+									"    console.log(\"Verification Token: \" + pm.collectionVariables.get(\"verificationToken\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/verify-email.php?token={{verificationToken}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"verify-email.php"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{verificationToken}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Verification Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/resend-verification.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"resend-verification.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\",\n    \"remember_me\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/login.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"login.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.remember_token) {",
+									"    pm.collectionVariables.set(\"rememberToken\", jsonData.data.remember_token);",
+									"    console.log(\"Remember Token: \" + pm.collectionVariables.get(\"rememberToken\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Check Auth Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/check-auth.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"check-auth.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{userEmail}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/forgot-password.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"forgot-password.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.reset_token) {",
+									"    pm.collectionVariables.set(\"resetToken\", jsonData.data.reset_token);",
+									"    console.log(\"Reset Token: \" + pm.collectionVariables.get(\"resetToken\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{resetToken}}\",\n    \"password\": \"{{newPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/reset-password.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"reset-password.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/auth/api/logout.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"auth",
+								"api",
+								"logout.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users Module (Authenticated)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/users/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"users",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles Module (Authenticated)",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/roles/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"roles",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Files Module",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/image.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/files/api/upload.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"files",
+								"api",
+								"upload.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Books Module",
+			"item": [
+				{
+					"name": "Create Book",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Sample Book Title",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "A detailed description of the sample book.",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "19.99",
+									"type": "text"
+								},
+								{
+									"key": "stock_quantity",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "author",
+									"value": "John Doe",
+									"type": "text"
+								},
+								{
+									"key": "publisher",
+									"value": "Publisher X",
+									"type": "text"
+								},
+								{
+									"key": "publication_year",
+									"value": "2023",
+									"type": "text"
+								},
+								{
+									"key": "images[]",
+									"type": "file",
+									"src": "/path/to/your/image1.jpg"
+								},
+								{
+									"key": "images[]",
+									"type": "file",
+									"src": "/path/to/your/image2.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/books/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"books",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Book Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "Sample Book Title",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "A detailed description of the sample book.",
+											"type": "text"
+										},
+										{
+											"key": "price",
+											"value": "19.99",
+											"type": "text"
+										},
+										{
+											"key": "stock_quantity",
+											"value": "100",
+											"type": "text"
+										},
+										{
+											"key": "category_id",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "author",
+											"value": "John Doe",
+											"type": "text"
+										},
+										{
+											"key": "publisher",
+											"value": "Publisher X",
+											"type": "text"
+										},
+										{
+											"key": "publication_year",
+											"value": "2023",
+											"type": "text"
+										},
+										{
+											"key": "images[]",
+											"type": "file",
+											"src": "/path/to/your/image1.jpg"
+										},
+										{
+											"key": "images[]",
+											"type": "file",
+											"src": "/path/to/your/image2.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/modules/books/api/index.php",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										"books",
+										"api",
+										"index.php"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/books/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"books",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/books/api/index.php?id={{bookId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"books",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{bookId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Updated Book Title",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "An updated detailed description of the sample book.",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "25.50",
+									"type": "text"
+								},
+								{
+									"key": "stock_quantity",
+									"value": "90",
+									"type": "text"
+								},
+								{
+									"key": "images[]",
+									"type": "file",
+									"src": "/path/to/your/new_image.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/books/api/index.php?id={{bookId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"books",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{bookId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Book",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/books/api/index.php?id={{bookId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"books",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{bookId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories Module",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sample Category\",\n    \"description\": \"A description for the sample category.\",\n    \"parent_id\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/categories/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"categories",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.category.id) {",
+									"    pm.collectionVariables.set(\"categoryId\", jsonData.data.category.id);",
+									"    console.log(\"Created Category ID: \" + pm.collectionVariables.get(\"categoryId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/categories/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"categories",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/categories/api/index.php?id={{categoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"categories",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{categoryId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Category Name\",\n    \"description\": \"An updated description for the sample category.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/categories/api/index.php?id={{categoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"categories",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{categoryId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/categories/api/index.php?id={{categoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"categories",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{categoryId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Posts Module",
+			"item": [
+				{
+					"name": "Create Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"My First Blog Post\",\n    \"content\": \"This is the content of my very first blog post. It's exciting!\",\n    \"user_id\": 1,\n    \"category_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/posts/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"posts",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.post.id) {",
+									"    pm.collectionVariables.set(\"postId\", jsonData.data.post.id);",
+									"    console.log(\"Created Post ID: \" + pm.collectionVariables.get(\"postId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/posts/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"posts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Post by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/posts/api/index.php?id={{postId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"posts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{postId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Post",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Blog Post Title\",\n    \"content\": \"This is the updated content of my blog post.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/posts/api/index.php?id={{postId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"posts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{postId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/posts/api/index.php?id={{postId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"posts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{postId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Post Comments Module",
+			"item": [
+				{
+					"name": "Create Post Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"post_id\": 1,\n    \"user_id\": 1,\n    \"comment_text\": \"This is a sample comment on a post.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/post_comments/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"post_comments",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.post_comment.id) {",
+									"    pm.collectionVariables.set(\"postCommentId\", jsonData.data.post_comment.id);",
+									"    console.log(\"Created Post Comment ID: \" + pm.collectionVariables.get(\"postCommentId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Post Comments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/post_comments/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"post_comments",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Post Comment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/post_comments/api/index.php?id={{postCommentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"post_comments",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{postCommentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Post Comment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment_text\": \"This is an updated comment on a post.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/post_comments/api/index.php?id={{postCommentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"post_comments",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{postCommentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/post_comments/api/index.php?id={{postCommentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"post_comments",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{postCommentId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Contacts Module",
+			"item": [
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"subject\": \"Inquiry about books\",\n    \"message\": \"I would like to know more about your book collection.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/contacts/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"contacts",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.contact.id) {",
+									"    pm.collectionVariables.set(\"contactId\", jsonData.data.contact.id);",
+									"    console.log(\"Created Contact ID: \" + pm.collectionVariables.get(\"contactId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Contacts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/contacts/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"contacts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contact by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/contacts/api/index.php?id={{contactId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"contacts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{contactId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"resolved\",\n    \"subject\": \"Updated Inquiry about books\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/contacts/api/index.php?id={{contactId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"contacts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{contactId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/contacts/api/index.php?id={{contactId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"contacts",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{contactId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders Module",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"total_amount\": 99.99,\n    \"status\": \"pending\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/orders/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"orders",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.order.id) {",
+									"    pm.collectionVariables.set(\"orderId\", jsonData.data.order.id);",
+									"    console.log(\"Created Order ID: \" + pm.collectionVariables.get(\"orderId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/orders/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"orders",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/orders/api/index.php?id={{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"orders",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/orders/api/index.php?id={{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"orders",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/orders/api/index.php?id={{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"orders",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order Items Module",
+			"item": [
+				{
+					"name": "Create Order Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 1,\n    \"book_id\": 1,\n    \"quantity\": 2,\n    \"price\": 19.99\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_items/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_items",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.order_item.id) {",
+									"    pm.collectionVariables.set(\"orderItemId\", jsonData.data.order_item.id);",
+									"    console.log(\"Created Order Item ID: \" + pm.collectionVariables.get(\"orderItemId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Order Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_items/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_items",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Item by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_items/api/index.php?id={{orderItemId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_items",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderItemId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 3,\n    \"price\": 25.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_items/api/index.php?id={{orderItemId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_items",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderItemId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_items/api/index.php?id={{orderItemId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_items",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderItemId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order Reviews Module",
+			"item": [
+				{
+					"name": "Create Order Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 1,\n    \"user_id\": 1,\n    \"rating\": 5,\n    \"comment\": \"Excellent service and book!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_reviews/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_reviews",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.order_review.id) {",
+									"    pm.collectionVariables.set(\"orderReviewId\", jsonData.data.order_review.id);",
+									"    console.log(\"Created Order Review ID: \" + pm.collectionVariables.get(\"orderReviewId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Order Reviews",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_reviews/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_reviews",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Review by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_reviews/api/index.php?id={{orderReviewId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_reviews",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderReviewId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Review",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"comment\": \"Good service, but book arrived late.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_reviews/api/index.php?id={{orderReviewId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_reviews",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderReviewId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order Review",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/order_reviews/api/index.php?id={{orderReviewId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"order_reviews",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{orderReviewId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions Module",
+			"item": [
+				{
+					"name": "Create Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"order_id\": 1,\n    \"amount\": 99.99,\n    \"currency\": \"USD\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/transactions/api/index.php",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"transactions",
+								"api",
+								"index.php"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.transaction.id) {",
+									"    pm.collectionVariables.set(\"transactionId\", jsonData.data.transaction.id);",
+									"    console.log(\"Created Transaction ID: \" + pm.collectionVariables.get(\"transactionId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/transactions/api/index.php?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"transactions",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transaction by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/transactions/api/index.php?id={{transactionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"transactions",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{transactionId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Transaction",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/modules/transactions/api/index.php?id={{transactionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"transactions",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{transactionId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Transaction",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/modules/transactions/api/index.php?id={{transactionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"modules",
+								"transactions",
+								"api",
+								"index.php"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{transactionId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost/bookon-be",
+			"type": "string"
+		},
+		{
+			"key": "userEmail",
+			"value": "testuser@example.com",
+			"type": "string"
+		},
+		{
+			"key": "userPassword",
+			"value": "password123",
+			"type": "string"
+		},
+		{
+			"key": "newPassword",
+			"value": "newpassword123",
+			"type": "string"
+		},
+		{
+			"key": "verificationToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "resetToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "postId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "postCommentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "contactId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderItemId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderReviewId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "transactionId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

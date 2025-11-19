@@ -9,9 +9,9 @@ SET
     FOREIGN_KEY_CHECKS = 0;
 
 -- Tạo Database
-CREATE DATABASE IF NOT EXISTS `web_bansach` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `bookon_web_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE `web_bansach`;
+USE `bookon_web_db`;
 
 -- =================================================================
 -- PHẦN 1: QUẢN LÝ NGƯỜI DÙNG & XÁC THỰC
