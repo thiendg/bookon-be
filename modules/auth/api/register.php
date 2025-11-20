@@ -74,6 +74,9 @@ if ($userModel->create($userData)) {
         Response::error('Failed to retrieve new user data after creation.', 500);
     }
 
+    // Remove password hash before sending user data in response
+    unset($newUser['password_hash']);
+
     // Generate email verification token
     $token = $userTokenModel->createToken($newUser['id'], 'email_verification');
     
