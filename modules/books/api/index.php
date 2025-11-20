@@ -1,10 +1,9 @@
 <?php
-// Set universal headers
-header("Access-Control-Allow-Origin: *");
+// Include CORS configuration early
+require_once __DIR__ . '/../../../utils/cors.php';
+
+// Set universal headers (excluding CORS which is handled by cors.php)
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Max-Age: 3600");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // Include dependencies
 require_once __DIR__ . '/../controllers/book-controller.php';
@@ -23,10 +22,9 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
-        // For books, read access might be public or require login depending on specific endpoint
-        // For now, let's assume read access requires login for consistency with users module
-        AuthMiddleware::requireLogin();
-        AuthMiddleware::requirePermission('books:read');
+        // Public access for reading books is allowed.
+        // AuthMiddleware::requireLogin();
+        // AuthMiddleware::requirePermission('books:read');
         break;
     case 'POST':
         AuthMiddleware::requirePermission('books:create'); // Creating books requires specific permission
