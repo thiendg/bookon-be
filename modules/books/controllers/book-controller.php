@@ -29,7 +29,7 @@ class BookController
             $filters['books.category_id'] = (int)$_GET['category_id'];
         }
         if (isset($_GET['search'])) {
-            $filters['books.name LIKE'] = '%' . $_GET['search'] . '%';
+            $filters['books.title LIKE'] = '%' . $_GET['search'] . '%';
         }
         // Add more filters as needed
 
@@ -74,8 +74,8 @@ class BookController
 
         // Basic validation for book data
         $errors = [];
-        if (empty($bookData['name'])) {
-            $errors['name'] = 'Book name is required.';
+        if (empty($bookData['title'])) {
+            $errors['title'] = 'Book title is required.';
         }
         if (empty($bookData['description'])) {
             $errors['description'] = 'Book description is required.';
@@ -101,7 +101,7 @@ class BookController
 
         // Prepare book data for database
         $bookDbData = [
-            'name' => $bookData['name'],
+            'title' => $bookData['title'],
             'description' => $bookData['description'],
             'price' => $bookData['price'],
             'stock_quantity' => $bookData['stock_quantity'] ?? 0,
@@ -109,6 +109,7 @@ class BookController
             'author' => $bookData['author'] ?? null,
             'publisher' => $bookData['publisher'] ?? null,
             'publication_year' => $bookData['publication_year'] ?? null,
+            'slug' => $bookData['slug'] ?? ''
         ];
 
         if (!empty($imagePaths)) {
@@ -147,8 +148,8 @@ class BookController
 
         // Basic validation for book data
         $errors = [];
-        if (empty($bookData['name'])) {
-            $errors['name'] = 'Book name is required.';
+        if (empty($bookData['title'])) {
+            $errors['title'] = 'Book title is required.';
         }
         if (empty($bookData['description'])) {
             $errors['description'] = 'Book description is required.';
@@ -174,7 +175,7 @@ class BookController
 
         // Prepare book data for database
         $bookDbData = [
-            'name' => $bookData['name'],
+            'title' => $bookData['title'],
             'description' => $bookData['description'],
             'price' => $bookData['price'],
             'stock_quantity' => $bookData['stock_quantity'] ?? $existingBook['stock_quantity'],

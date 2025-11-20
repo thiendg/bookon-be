@@ -25,17 +25,17 @@ switch ($method) {
     case 'GET':
         // For books, read access might be public or require login depending on specific endpoint
         // For now, let's assume read access requires login for consistency with users module
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('books:read'); 
+        AuthMiddleware::requireLogin();
+        AuthMiddleware::requirePermission('books:read');
         break;
     case 'POST':
-        AuthMiddleware::requirePermission('books:manage'); // Creating books requires specific permission
+        AuthMiddleware::requirePermission('books:create'); // Creating books requires specific permission
         break;
     case 'PUT':
-        AuthMiddleware::requirePermission('books:manage'); // Updating books requires specific permission
+        AuthMiddleware::requirePermission('books:edit'); // Updating books requires specific permission
         break;
     case 'DELETE':
-        AuthMiddleware::requirePermission('books:manage'); // Deleting books requires specific permission
+        AuthMiddleware::requirePermission('books:delete'); // Deleting books requires specific permission
         break;
     case 'OPTIONS':
         // Allow preflight requests without authentication
