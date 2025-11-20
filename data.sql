@@ -61,14 +61,14 @@ VALUES
     (
         1,
         'Admin',
-        '{"users": ["create", "read", "update", "delete", "ban"], "books": ["create", "read", "update", "delete"], "categories": ["create", "read", "update", "delete"], "orders": ["read", "update", "delete"], "posts": ["create", "read", "update", "delete"], "reviews": ["read", "update", "delete"], "faqs": ["create", "read", "update", "delete"], "settings": ["update"]}',
+        '{"users": ["create", "read", "update", "delete", "ban"], "roles": ["create", "read", "update", "delete"], "sessions": ["read", "delete"], "tokens": ["read", "create", "delete"], "files": ["upload"], "books": ["create", "read", "update", "delete"], "categories": ["create", "read", "update", "delete"], "orders": ["read", "update", "delete"], "posts": ["create", "read", "update", "delete"], "reviews": ["read", "update", "delete"], "faqs": ["create", "read", "update", "delete"], "settings": ["update"]}',
         UNIX_TIMESTAMP(),
         UNIX_TIMESTAMP()
     ),
     (
         2,
         'Customer',
-        '{"profile": ["read_own", "update_own"], "orders": ["create", "read_own"], "reviews": ["create", "read_own", "update_own", "delete_own"], "post_comments": ["create", "read_own", "update_own", "delete_own"], "books": ["read"], "posts": ["read"]}',
+        '{"orders": ["create", "read_own"], "reviews": ["create", "read_own", "update_own", "delete_own"], "post_comments": ["create", "read_own", "update_own", "delete_own"], "books": ["read"], "posts": ["read"], "files": ["upload"]}',
         UNIX_TIMESTAMP(),
         UNIX_TIMESTAMP()
     );

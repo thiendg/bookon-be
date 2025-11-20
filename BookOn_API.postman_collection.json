@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "YOUR_POSTMAN_COLLECTION_ID",
+		"_postman_id": "16885adb-3e4c-485b-9208-001e07f623ca",
 		"name": "BookOn API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_collection_id": "YOUR_POSTMAN_COLLECTION_ID"
+		"_exporter_id": "39134324",
+		"_collection_link": "https://cnpm33-2074.postman.co/workspace/DADN~248c6464-9c39-4de3-b34c-e88f7d68d111/collection/39134324-16885adb-3e4c-485b-9208-001e07f623ca?action=share&source=collection_link&creator=39134324"
 	},
 	"item": [
 		{
@@ -11,6 +12,21 @@
 			"item": [
 				{
 					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.verification_token) {",
+									"    pm.collectionVariables.set(\"verificationToken\", jsonData.data.verification_token);",
+									"    console.log(\"Verification Token: \" + pm.collectionVariables.get(\"verificationToken\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -76,21 +92,6 @@
 							"cookie": [],
 							"body": "{\n    \"success\": true,\n    \"message\": \"Registration successful. Please check your email to verify your account.\",\n    \"data\": {\n        \"user\": {\n            \"id\": \"1\",\n            \"email\": \"test@example.com\",\n            \"full_name\": \"Test User\",\n            \"status\": \"unverified\",\n            \"avatar_url\": \"default_avatar.png\",\n            \"role_id\": null,\n            \"phone_number\": null,\n            \"address\": null,\n            \"created_at\": \"1678886400\",\n            \"updated_at\": \"1678886400\"\n        },\n        \"verification_token\": \"some_verification_token\"\n    }"
 						}
-					],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.verification_token) {",
-									"    pm.collectionVariables.set(\"verificationToken\", jsonData.data.verification_token);",
-									"    console.log(\"Verification Token: \" + pm.collectionVariables.get(\"verificationToken\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
 					]
 				},
 				{
@@ -150,6 +151,21 @@
 				},
 				{
 					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.remember_token) {",
+									"    pm.collectionVariables.set(\"rememberToken\", jsonData.data.remember_token);",
+									"    console.log(\"Remember Token: \" + pm.collectionVariables.get(\"rememberToken\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -175,22 +191,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.remember_token) {",
-									"    pm.collectionVariables.set(\"rememberToken\", jsonData.data.remember_token);",
-									"    console.log(\"Remember Token: \" + pm.collectionVariables.get(\"rememberToken\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Check Auth Status",
@@ -214,6 +215,21 @@
 				},
 				{
 					"name": "Forgot Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.reset_token) {",
+									"    pm.collectionVariables.set(\"resetToken\", jsonData.data.reset_token);",
+									"    console.log(\"Reset Token: \" + pm.collectionVariables.get(\"resetToken\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -239,22 +255,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.reset_token) {",
-									"    pm.collectionVariables.set(\"resetToken\", jsonData.data.reset_token);",
-									"    console.log(\"Reset Token: \" + pm.collectionVariables.get(\"resetToken\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Reset Password",
@@ -541,7 +542,11 @@
 										"index.php"
 									]
 								}
-							}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
 						}
 					]
 				},
@@ -690,6 +695,21 @@
 			"item": [
 				{
 					"name": "Create Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.category.id) {",
+									"    pm.collectionVariables.set(\"categoryId\", jsonData.data.category.id);",
+									"    console.log(\"Created Category ID: \" + pm.collectionVariables.get(\"categoryId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -715,22 +735,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.category.id) {",
-									"    pm.collectionVariables.set(\"categoryId\", jsonData.data.category.id);",
-									"    console.log(\"Created Category ID: \" + pm.collectionVariables.get(\"categoryId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Categories",
@@ -856,6 +861,21 @@
 			"item": [
 				{
 					"name": "Create Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.post.id) {",
+									"    pm.collectionVariables.set(\"postId\", jsonData.data.post.id);",
+									"    console.log(\"Created Post ID: \" + pm.collectionVariables.get(\"postId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -881,22 +901,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.post.id) {",
-									"    pm.collectionVariables.set(\"postId\", jsonData.data.post.id);",
-									"    console.log(\"Created Post ID: \" + pm.collectionVariables.get(\"postId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Posts",
@@ -1022,6 +1027,21 @@
 			"item": [
 				{
 					"name": "Create Post Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.post_comment.id) {",
+									"    pm.collectionVariables.set(\"postCommentId\", jsonData.data.post_comment.id);",
+									"    console.log(\"Created Post Comment ID: \" + pm.collectionVariables.get(\"postCommentId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1047,22 +1067,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.post_comment.id) {",
-									"    pm.collectionVariables.set(\"postCommentId\", jsonData.data.post_comment.id);",
-									"    console.log(\"Created Post Comment ID: \" + pm.collectionVariables.get(\"postCommentId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Post Comments",
@@ -1188,6 +1193,21 @@
 			"item": [
 				{
 					"name": "Create Contact",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.contact.id) {",
+									"    pm.collectionVariables.set(\"contactId\", jsonData.data.contact.id);",
+									"    console.log(\"Created Contact ID: \" + pm.collectionVariables.get(\"contactId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1213,22 +1233,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.contact.id) {",
-									"    pm.collectionVariables.set(\"contactId\", jsonData.data.contact.id);",
-									"    console.log(\"Created Contact ID: \" + pm.collectionVariables.get(\"contactId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Contacts",
@@ -1354,6 +1359,21 @@
 			"item": [
 				{
 					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.order.id) {",
+									"    pm.collectionVariables.set(\"orderId\", jsonData.data.order.id);",
+									"    console.log(\"Created Order ID: \" + pm.collectionVariables.get(\"orderId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1379,22 +1399,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.order.id) {",
-									"    pm.collectionVariables.set(\"orderId\", jsonData.data.order.id);",
-									"    console.log(\"Created Order ID: \" + pm.collectionVariables.get(\"orderId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Orders",
@@ -1520,6 +1525,21 @@
 			"item": [
 				{
 					"name": "Create Order Item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.order_item.id) {",
+									"    pm.collectionVariables.set(\"orderItemId\", jsonData.data.order_item.id);",
+									"    console.log(\"Created Order Item ID: \" + pm.collectionVariables.get(\"orderItemId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1545,22 +1565,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.order_item.id) {",
-									"    pm.collectionVariables.set(\"orderItemId\", jsonData.data.order_item.id);",
-									"    console.log(\"Created Order Item ID: \" + pm.collectionVariables.get(\"orderItemId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Order Items",
@@ -1686,6 +1691,21 @@
 			"item": [
 				{
 					"name": "Create Order Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.order_review.id) {",
+									"    pm.collectionVariables.set(\"orderReviewId\", jsonData.data.order_review.id);",
+									"    console.log(\"Created Order Review ID: \" + pm.collectionVariables.get(\"orderReviewId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1711,22 +1731,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.order_review.id) {",
-									"    pm.collectionVariables.set(\"orderReviewId\", jsonData.data.order_review.id);",
-									"    console.log(\"Created Order Review ID: \" + pm.collectionVariables.get(\"orderReviewId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Order Reviews",
@@ -1852,6 +1857,21 @@
 			"item": [
 				{
 					"name": "Create Transaction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.transaction.id) {",
+									"    pm.collectionVariables.set(\"transactionId\", jsonData.data.transaction.id);",
+									"    console.log(\"Created Transaction ID: \" + pm.collectionVariables.get(\"transactionId\"));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1877,22 +1897,7 @@
 							]
 						}
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.success && jsonData.data.transaction.id) {",
-									"    pm.collectionVariables.set(\"transactionId\", jsonData.data.transaction.id);",
-									"    console.log(\"Created Transaction ID: \" + pm.collectionVariables.get(\"transactionId\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Get All Transactions",
@@ -2109,6 +2114,10 @@
 			"key": "transactionId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "rememberToken",
+			"value": ""
 		}
 	]
 }
