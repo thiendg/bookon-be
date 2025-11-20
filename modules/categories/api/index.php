@@ -1,10 +1,9 @@
 <?php
-// Set universal headers
-header("Access-Control-Allow-Origin: *");
+// Include CORS configuration early
+require_once __DIR__ . '/../../../utils/cors.php';
+
+// Set universal headers (excluding CORS which is handled by cors.php)
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Max-Age: 3600");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // Include dependencies
 require_once __DIR__ . '/../controllers/category-controller.php';
@@ -23,9 +22,9 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
-        // Categories might be publicly readable, but for consistency with users/books, require login for now
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('categories:read'); // Specific permission for reading categories
+        // Categories should be publicly readable for browsing.
+        // AuthMiddleware::requireLogin(); 
+        // AuthMiddleware::requirePermission('categories:read'); // Specific permission for reading categories
         break;
     case 'POST':
         AuthMiddleware::requirePermission('categories:manage'); // Creating categories requires specific permission
