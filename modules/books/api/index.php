@@ -22,6 +22,13 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
+        // Check for special 'select' action
+        if (isset($_GET['action']) && $_GET['action'] === 'select') {
+            // Select options for books are publicly readable for dropdowns
+            $routePath = __DIR__ . '/routes/select.php';
+            require $routePath; // Require the select file and exit
+            exit();
+        }
         // Public access for reading books is allowed.
         // AuthMiddleware::requireLogin();
         // AuthMiddleware::requirePermission('books:read');

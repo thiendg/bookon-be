@@ -34,14 +34,13 @@ class PostController
         }
         // Add more filters as needed
 
-        $posts = $this->postModel->findAll($filters, $limit, $offset);
-        $totalPosts = $this->postModel->count($filters);
-
+        $paginationResult = $this->postModel->findPage($page, $limit, $filters);
+        
         Response::success([
-            'posts' => $posts,
-            'total' => $totalPosts,
-            'page' => $page,
-            'limit' => $limit
+            'posts' => $paginationResult['data'],
+            'total' => $paginationResult['pagination']['totalItems'],
+            'page' => $paginationResult['pagination']['currentPage'],
+            'limit' => $paginationResult['pagination']['pageSize']
         ], 'Posts retrieved successfully.');
     }
 

@@ -225,4 +225,14 @@ class BookController
             Response::error('Failed to delete book.', 500);
         }
     }
+
+    /**
+     * Retrieves books formatted for select/dropdown inputs.
+     */
+    public function getSelectOptions()
+    {
+        // For books, we might want title and id
+        $options = $this->bookModel->getSelectOptions('id', 'title');
+        Response::success($options, 'Book select options retrieved successfully.');
+    }
 }

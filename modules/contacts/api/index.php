@@ -26,9 +26,9 @@ switch ($method) {
         AuthMiddleware::requirePermission('contacts:read'); // Specific permission for reading contacts
         break;
     case 'POST':
-        // Contact form submissions might not require login, but for consistency, let's require it for now
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('contacts:manage'); // Creating contacts requires specific permission
+        // Contact form submissions should be publicly accessible
+        // AuthMiddleware::requireLogin(); 
+        // AuthMiddleware::requirePermission('contacts:manage'); // Creating contacts requires specific permission
         break;
     case 'PUT':
         AuthMiddleware::requireLogin(); 

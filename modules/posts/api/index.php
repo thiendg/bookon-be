@@ -23,8 +23,8 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 switch ($method) {
     case 'GET':
         // Posts might be publicly readable, but for consistency with users/books, require login for now
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('posts:read'); // Specific permission for reading posts
+ 
+
         break;
     case 'POST':
         AuthMiddleware::requirePermission('posts:manage'); // Creating posts requires specific permission

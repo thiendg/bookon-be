@@ -22,7 +22,14 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
-        AuthMiddleware::requirePermission('roles:read'); // All GET requests for roles require read permission
+        // Check for special 'select' action
+        if (isset($_GET['action']) && $_GET['action'] === 'select') {
+            AuthMiddleware::requirePermission('roles:read'); // Select options also require read permission
+            $routePath = __DIR__ . '/routes/select.php';
+            require $routePath; // Require the select file and exit
+            exit();
+        }
+        AuthMiddleware::requirePermission('roles:read'); // All other GET requests for roles require read permission
         break;
     case 'POST':
         AuthMiddleware::requirePermission('roles:create'); // Creating roles requires specific permission
