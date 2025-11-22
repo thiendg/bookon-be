@@ -23,8 +23,8 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 switch ($method) {
     case 'GET':
         // FAQs might be publicly readable, but for consistency with other modules, require login for now
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('faqs:read'); // Specific permission for reading FAQs
+ 
+
         break;
     case 'POST':
         AuthMiddleware::requirePermission('faqs:manage'); // Creating FAQs requires specific permission

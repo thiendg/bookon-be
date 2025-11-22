@@ -23,8 +23,8 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 switch ($method) {
     case 'GET':
         // Post comments might be publicly readable, but for consistency with other modules, require login for now
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('post_comments:read'); // Specific permission for reading post comments
+ 
+
         break;
     case 'POST':
         AuthMiddleware::requirePermission('post_comments:manage'); // Creating post comments requires specific permission

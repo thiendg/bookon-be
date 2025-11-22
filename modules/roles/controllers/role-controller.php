@@ -136,4 +136,13 @@ class RoleController
             Response::error('Failed to delete role', 500);
         }
     }
+
+    /**
+     * Retrieves roles formatted for select/dropdown inputs.
+     */
+    public function getSelectOptions()
+    {
+        $options = $this->roleModel->getSelectOptions('id', 'name'); // Assuming 'id' for value and 'name' for label
+        Response::success($options, 'Role select options retrieved successfully.');
+    }
 }

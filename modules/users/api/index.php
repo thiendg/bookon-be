@@ -22,7 +22,14 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
-        AuthMiddleware::requireLogin(); // All GET requests for users require login
+        // Check for special 'select' action
+        if (isset($_GET['action']) && $_GET['action'] === 'select') {
+            AuthMiddleware::requirePermission('users:read'); // Select options also require read permission
+            $routePath = __DIR__ . '/routes/select.php';
+            require $routePath; // Require the select file and exit
+            exit();
+        }
+        AuthMiddleware::requireLogin(); // All other GET requests for users require login
         break;
     case 'POST':
         AuthMiddleware::requirePermission('users:create'); // Creating users requires specific permission

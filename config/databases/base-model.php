@@ -293,4 +293,38 @@ class BaseModel
         $stmt->bind_param($types, ...$params);
         return $stmt->execute();
     }
+
+    /**
+     * Retrieves records formatted for select/dropdown inputs.
+     * @param string $valueColumn The column name to use for the 'value' in the frontend.
+     * @param string $labelColumn The column name to use for the 'label' in the frontend.
+     * @param array $filters Optional filters to apply to the query.
+     * @return array An array of associative arrays, each with 'value' and 'label' keys.
+     */
+    public function getSelectOptions(string $valueColumn = 'id', string $labelColumn = 'name', array $filters = []): array
+    {
+        $params = [];
+        $types = '';
+        // Note: _buildWhereClause assumes simple filters directly on the main table for getSelectOptions
+        // Need to ensure $this->tableName is correctly passed if filters use qualified names
+        $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
+
+        $sql = "SELECT `{$valueColumn}`, `{$labelColumn}` FROM `{$this->tableName}`" . $whereClause;
+        $stmt = $this->conn->prepare($sql);
+
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $options = [];
+        while ($row = $result->fetch_assoc()) {
+            $options[] = [
+                'value' => $row[$valueColumn],
+                'label' => $row[$labelColumn]
+            ];
+        }
+        return $options;
+    }
 }

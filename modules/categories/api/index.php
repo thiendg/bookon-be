@@ -22,6 +22,13 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
+        // Check for special 'select' action
+        if (isset($_GET['action']) && $_GET['action'] === 'select') {
+            // Select options for categories are publicly readable for dropdowns
+            $routePath = __DIR__ . '/routes/select.php';
+            require $routePath; // Require the select file and exit
+            exit();
+        }
         // Categories should be publicly readable for browsing.
         // AuthMiddleware::requireLogin(); 
         // AuthMiddleware::requirePermission('categories:read'); // Specific permission for reading categories

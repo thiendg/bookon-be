@@ -179,4 +179,13 @@ class CategoryController
 
         return $text;
     }
+
+    /**
+     * Retrieves categories formatted for select/dropdown inputs.
+     */
+    public function getSelectOptions()
+    {
+        $options = $this->categoryModel->getSelectOptions('id', 'name'); // Assuming 'id' for value and 'name' for label
+        Response::success($options, 'Category select options retrieved successfully.');
+    }
 }

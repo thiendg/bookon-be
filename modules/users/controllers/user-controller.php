@@ -154,4 +154,13 @@ class UserController
             Response::error('Failed to delete user', 500);
         }
     }
+
+    /**
+     * Retrieves users formatted for select/dropdown inputs.
+     */
+    public function getSelectOptions()
+    {
+        $options = $this->userModel->getSelectOptions('id', 'full_name'); // Assuming 'id' for value and 'full_name' for label
+        Response::success($options, 'User select options retrieved successfully.');
+    }
 }
