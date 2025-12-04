@@ -65,19 +65,43 @@ class BaseModel
      */
     protected function _buildOrderByClause($orderBy, $tablePrefix = null)
     {
-        if (empty($orderBy)) {
+        // If not an array or empty, nothing to order
+        if (!is_array($orderBy) || empty($orderBy)) {
             return "";
         }
 
         $prefix = $tablePrefix ? "`{$tablePrefix}`." : "";
         $orderClauses = [];
         foreach ($orderBy as $key => $direction) {
-            if (strtoupper($direction) !== 'ASC' && strtoupper($direction) !== 'DESC') {
+            // sanitize inputs
+            $col = trim((string)$key);
+            $dir = strtoupper(trim((string)$direction));
+            if ($col === '' || ($dir !== 'ASC' && $dir !== 'DESC')) {
+                // skip invalid entries
                 continue;
             }
-            $orderClauses[] = $prefix . "`$key` $direction";
+
+            // escape column name and add prefix
+            if (strpos($col, '.') !== false) {
+                $sub = explode('.', $col);
+                $sub = array_map(function($p){ return "`".trim($p,'` ')."`"; }, $sub);
+                $colEscaped = implode('.', $sub);
+            } else {
+                $colEscaped = "`" . trim($col, '` ') . "`";
+            }
+            if ($prefix) {
+                $p = rtrim($prefix, '.') . '.';
+                $colEscaped = $p . ltrim($colEscaped, '`');
+            }
+
+            $orderClauses[] = $colEscaped . " " . $dir;
         }
-        return " ORDER BY " . implode(", ", $orderClauses);
+
+        if (count($orderClauses) === 0) {
+            return "";
+        }
+
+        return ' ORDER BY ' . implode(', ', $orderClauses);
     }
 
     /**
@@ -140,6 +164,9 @@ class BaseModel
         $orderByClause = $this->_buildOrderByClause($orderBy, $this->tableName);
 
         $sql = "SELECT " . $selectClause . " FROM `{$this->tableName}`" . $whereClause . $orderByClause;
+        // DEBUG: log built SQL and params for troubleshooting (temporary)
+        error_log("[DEBUG SQL - findAll] " . $sql . " | params: " . json_encode($params));
+        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] " . $sql . " | params: " . json_encode($params) . PHP_EOL, FILE_APPEND);
         $stmt = $this->conn->prepare($sql);
         if (!empty($params)) {
             $stmt->bind_param($types, ...$params);
