@@ -10,11 +10,20 @@ class Response {
      */
     public static function success($data = null, $message = 'Success', $code = 200) {
         http_response_code($code);
-        echo json_encode([
+
+        $response = [
             'success' => true,
             'message' => $message,
             'data' => $data
-        ]);
+        ];
+
+        // If the data contains pagination info with totalItems, expose
+        // a top-level `totalItem` for convenience (backwards-compatible).
+        if (is_array($data) && isset($data['pagination']) && isset($data['pagination']['totalItems'])) {
+            $response['totalItem'] = (int) $data['pagination']['totalItems'];
+        }
+
+        echo json_encode($response);
         exit();
     }
 

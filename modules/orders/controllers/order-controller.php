@@ -31,14 +31,13 @@ class OrderController
         }
         // Add more filters as needed
 
-        $orders = $this->orderModel->findAll($filters, $limit, $offset);
-        $totalOrders = $this->orderModel->count($filters);
+        $paginationResult = $this->orderModel->findPage($page, $limit, $filters);
 
         Response::success([
-            'orders' => $orders,
-            'total' => $totalOrders,
-            'page' => $page,
-            'limit' => $limit
+            'posts' => $paginationResult['data'],
+            'total' => $paginationResult['pagination']['totalItems'],
+            'page' => $paginationResult['pagination']['currentPage'],
+            'limit' => $paginationResult['pagination']['pageSize']
         ], 'Orders retrieved successfully.');
     }
 

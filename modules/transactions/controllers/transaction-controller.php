@@ -34,14 +34,13 @@ class TransactionController
         }
         // Add more filters as needed
 
-        $transactions = $this->transactionModel->findAll($filters, $limit, $offset);
-        $totalTransactions = $this->transactionModel->count($filters);
+        $paginationResult = $this->transactionModel->findPage($page, $limit, $filters);
 
         Response::success([
-            'transactions' => $transactions,
-            'total' => $totalTransactions,
-            'page' => $page,
-            'limit' => $limit
+            'posts' => $paginationResult['data'],
+            'total' => $paginationResult['pagination']['totalItems'],
+            'page' => $paginationResult['pagination']['currentPage'],
+            'limit' => $paginationResult['pagination']['pageSize']
         ], 'Transactions retrieved successfully.');
     }
 
