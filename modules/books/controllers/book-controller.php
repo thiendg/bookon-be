@@ -39,7 +39,12 @@ class BookController
             $orderBy[$_GET['sortBy']] = $_GET['sortOrder'];
         }
 
-        $result = $this->bookModel->getBooksWithCategoryName($page, $pageSize, $filters, $orderBy);
+        // If client requests sales data, use the specialized query
+        if (isset($_GET['withSales']) && ($_GET['withSales'] === '1' || strtolower($_GET['withSales']) === 'true')) {
+            $result = $this->bookModel->getBooksWithSales($page, $pageSize, $filters, $orderBy);
+        } else {
+            $result = $this->bookModel->getBooksWithCategoryName($page, $pageSize, $filters, $orderBy);
+        }
 
         Response::success($result, 'Books retrieved successfully.');
     }

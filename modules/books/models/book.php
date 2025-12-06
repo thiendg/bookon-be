@@ -86,6 +86,108 @@ class BookModel extends BaseModel
         $dataStmt->execute();
         $data = $dataStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
+        // Ensure numeric fields are returned as ints for consistency
+        if (is_array($data) && !empty($data)) {
+            foreach ($data as &$row) {
+                if (isset($row['sold_count'])) {
+                    $row['sold_count'] = (int) $row['sold_count'];
+                }
+            }
+            unset($row);
+        }
+
+        return [
+            'data' => $data,
+            'pagination' => [
+                'totalItems' => (int)$totalItems,
+                'totalPages' => (int)$totalPages,
+                'currentPage' => (int)$page,
+                'pageSize' => (int)$pageSize,
+                'hasNextPage' => $page < $totalPages,
+                'hasPrevPage' => $page > 1
+            ]
+        ];
+    }
+
+    /**
+     * Fetches a paginated list of books including their category name and
+     * the number of items sold (sum of order_items.quantity).
+     * By default, only orders with status in ('processing','shipped','completed')
+     * are counted. Adjust the $countOrderStatuses param if you want different logic.
+     *
+     * @param int $page
+     * @param int $pageSize
+     * @param array $filters
+     * @param array $orderBy
+     * @param array $countOrderStatuses
+     * @return array
+     */
+    public function getBooksWithSales($page = 1, $pageSize = 10, $filters = [], $orderBy = [], $countOrderStatuses = ['shipped','completed'])
+    {
+        $params = [];
+        $types = '';
+
+        // Build where clause using parent's helper (prefix with books)
+        $whereClause = parent::_buildWhereClause($filters, $params, $types, 'books');
+
+        // Prepare a statuses list for the JOIN condition (we'll bind none, use literals safely)
+        $escapedStatuses = array_map(function($s) {
+            return "'" . $this->conn->real_escape_string($s) . "'";
+        }, $countOrderStatuses);
+        $statusesList = implode(',', $escapedStatuses);
+
+        // Count total distinct books matching filters and having orders with allowed statuses
+        $countSql = "SELECT COUNT(DISTINCT books.id) as total FROM books "
+              . "LEFT JOIN categories ON books.category_id = categories.id "
+              . "INNER JOIN order_items ON order_items.book_id = books.id "
+              . "INNER JOIN orders ON order_items.order_id = orders.id AND orders.status IN ($statusesList) "
+              . $whereClause;
+
+        $stmt = $this->conn->prepare($countSql);
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        $totalItems = $stmt->get_result()->fetch_assoc()['total'];
+
+        // Pagination calculations
+        $totalPages = ceil($totalItems / $pageSize);
+        $offset = ($page - 1) * $pageSize;
+
+        // Data query with sold count
+        $orderByClause = parent::_buildOrderByClause($orderBy, 'books');
+        // Sum only order_items that belong to orders with allowed statuses using CASE WHEN.
+           $dataSql = "SELECT books.*, categories.name AS category_name, "
+               . "COALESCE(SUM(CASE WHEN orders.status IN ($statusesList) THEN order_items.quantity ELSE 0 END), 0) AS sold_count "
+               . "FROM books "
+               . "LEFT JOIN categories ON books.category_id = categories.id "
+               . "LEFT JOIN order_items ON order_items.book_id = books.id "
+               . "LEFT JOIN orders ON order_items.order_id = orders.id "
+               . $whereClause
+               . " GROUP BY books.id "
+               . " HAVING COALESCE(SUM(CASE WHEN orders.status IN ($statusesList) THEN order_items.quantity ELSE 0 END), 0) > 0 "
+               . $orderByClause
+               . " LIMIT ? OFFSET ?";
+
+        $dataStmt = $this->conn->prepare($dataSql);
+        $dataParams = $params;
+        $dataParams[] = $pageSize;
+        $dataParams[] = $offset;
+        $dataTypes = $types . 'ii';
+        $dataStmt->bind_param($dataTypes, ...$dataParams);
+        $dataStmt->execute();
+        $data = $dataStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Cast sold_count to integer for consistency
+        if (is_array($data) && !empty($data)) {
+            foreach ($data as &$row) {
+                if (isset($row['sold_count'])) {
+                    $row['sold_count'] = (int) $row['sold_count'];
+                }
+            }
+            unset($row);
+        }
+
         return [
             'data' => $data,
             'pagination' => [
