@@ -27,7 +27,8 @@ switch ($method) {
 
         break;
     case 'POST':
-        AuthMiddleware::requirePermission('post_comments:create'); // Creating post comments requires specific permission
+        AuthMiddleware::requirePermission('post_comments:create');
+        
         break;
     case 'PUT':
         AuthMiddleware::requirePermission('post_comments:update_own'); // Updating post comments requires specific permission
