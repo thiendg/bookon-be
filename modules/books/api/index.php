@@ -22,8 +22,6 @@ if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
     $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
 }
 // Apply middleware based on method
-@file_put_contents(__DIR__ . '/book.log', date('c') . 'METHOD:' . $method . PHP_EOL, FILE_APPEND);
-@file_put_contents(__DIR__ . '/book.log', date('c') . 'SERVER:' . $_SERVER . PHP_EOL, FILE_APPEND);
 switch ($method) {
     case 'GET':
         // Check for special 'select' action
