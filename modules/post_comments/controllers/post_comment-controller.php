@@ -31,15 +31,14 @@ class PostCommentController
         }
         // Add more filters as needed
 
-        $postComments = $this->postCommentModel->findAll($filters, $limit, $offset);
-        $totalPostComments = $this->postCommentModel->count($filters);
+        $paginationResult = $this->postCommentModel->findPage($page, $limit, $filters);
 
         Response::success([
-            'post_comments' => $postComments,
-            'total' => $totalPostComments,
-            'page' => $page,
-            'limit' => $limit
-        ], 'Post comments retrieved successfully.');
+            'posts' => $paginationResult['data'],
+            'total' => $paginationResult['pagination']['totalItems'],
+            'page' => $paginationResult['pagination']['currentPage'],
+            'limit' => $paginationResult['pagination']['pageSize']
+        ], 'PostComment retrieved successfully.');
     }
 
     /**
@@ -68,17 +67,16 @@ class PostCommentController
     public function createPostComment()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-
+    @file_put_contents(__DIR__ . '/comments.log', date('c') . 'Comment_data: ' . 'post_id: ' . $data['post_id'] . ' user_id: ' . $data['user_id'] . ' content: ' . $data['content'] . PHP_EOL, FILE_APPEND);
         // Basic validation
-        if (empty($data['post_id']) || empty($data['user_id']) || empty($data['comment_text'])) {
-            Response::error('Missing required fields: post_id, user_id, comment_text', 400);
+        if (empty($data['post_id']) || empty($data['user_id']) || empty($data['content'])) {
+            Response::error('Missing required fields: post_id, user_id, content', 400);
             return;
         }
 
         // Set timestamps
         $currentTime = time();
         $data['created_at'] = $currentTime;
-        $data['updated_at'] = $currentTime;
 
         if ($newPostCommentId = $this->postCommentModel->create($data)) {
             $newPostComment = $this->postCommentModel->find($newPostCommentId);

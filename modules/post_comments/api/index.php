@@ -27,13 +27,13 @@ switch ($method) {
 
         break;
     case 'POST':
-        AuthMiddleware::requirePermission('post_comments:manage'); // Creating post comments requires specific permission
+        AuthMiddleware::requirePermission('post_comments:create'); // Creating post comments requires specific permission
         break;
     case 'PUT':
-        AuthMiddleware::requirePermission('post_comments:manage'); // Updating post comments requires specific permission
+        AuthMiddleware::requirePermission('post_comments:update_own'); // Updating post comments requires specific permission
         break;
     case 'DELETE':
-        AuthMiddleware::requirePermission('post_comments:manage'); // Deleting post comments requires specific permission
+        AuthMiddleware::requirePermission('post_comments:delete_own'); // Deleting post comments requires specific permission
         break;
     case 'OPTIONS':
         // Allow preflight requests without authentication

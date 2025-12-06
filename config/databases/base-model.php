@@ -241,9 +241,11 @@ class BaseModel
         $columns = implode(", ", array_map(function ($col) {
             return "`$col`";
         }, array_keys($data)));
+        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] Data to insert: " . json_encode($data) . PHP_EOL, FILE_APPEND);
         $placeholders = implode(", ", array_fill(0, count($data), '?'));
         $sql = "INSERT INTO `{$this->tableName}` ($columns) VALUES ($placeholders)";
-        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] " . $sql . " | params: " . json_encode($params) . PHP_EOL, FILE_APPEND);
+        // Log the SQL with the actual parameter values that will be bound.
+        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] " . $sql . " | params: " . json_encode(array_values($data)) . PHP_EOL, FILE_APPEND);
         $stmt = $this->conn->prepare($sql);
         $types = str_repeat('s', count($data));
         $stmt->bind_param($types, ...array_values($data));
