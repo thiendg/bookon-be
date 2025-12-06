@@ -67,7 +67,6 @@ class PostCommentController
     public function createPostComment()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-    @file_put_contents(__DIR__ . '/comments.log', date('c') . 'Comment_data: ' . 'post_id: ' . $data['post_id'] . ' user_id: ' . $data['user_id'] . ' content: ' . $data['content'] . PHP_EOL, FILE_APPEND);
         // Basic validation
         if (empty($data['post_id']) || empty($data['user_id']) || empty($data['content'])) {
             Response::error('Missing required fields: post_id, user_id, content', 400);

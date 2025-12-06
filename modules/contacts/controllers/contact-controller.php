@@ -16,27 +16,25 @@ class ContactController
      */
     public function listContacts()
     {
-        // Pagination
+        // Pagination (match BookController flow)
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-        $offset = ($page - 1) * $limit;
+        $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 10;
 
         // Filtering
         $filters = [];
         if (isset($_GET['status'])) {
             $filters['status'] = $_GET['status'];
         }
-        // Add more filters as needed
 
-        $contacts = $this->contactModel->findAll($filters, $limit, $offset);
-        $totalContacts = $this->contactModel->count($filters);
+        // Ordering
+        $orderBy = [];
+        if (isset($_GET['sortBy']) && isset($_GET['sortOrder'])) {
+            $orderBy[$_GET['sortBy']] = $_GET['sortOrder'];
+        }
 
-        Response::success([
-            'contacts' => $contacts,
-            'total' => $totalContacts,
-            'page' => $page,
-            'limit' => $limit
-        ], 'Contacts retrieved successfully.');
+        $result = $this->contactModel->findPage($page, $pageSize, $filters, $orderBy);
+
+        Response::success($result, 'Contacts retrieved successfully.');
     }
 
     /**
@@ -64,7 +62,8 @@ class ContactController
      */
     public function createContact()
     {
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Accept form-data (`$_POST`) or JSON body
+        $data = !empty($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true);
 
         // Basic validation
         if (empty($data['name']) || empty($data['email']) || empty($data['message'])) {
@@ -102,8 +101,8 @@ class ContactController
             Response::notFound('Contact not found.');
             return;
         }
-
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Accept form-data (`$_POST`) or JSON body
+        $data = !empty($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true);
 
         if (empty($data)) {
             Response::error('No data provided for update', 400);

@@ -23,12 +23,12 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 switch ($method) {
     case 'GET':
         AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('contacts:read'); // Specific permission for reading contacts
+        //AuthMiddleware::requirePermission('contacts:read'); // Specific permission for reading contacts
         break;
     case 'POST':
         // Contact form submissions should be publicly accessible
         // AuthMiddleware::requireLogin(); 
-        // AuthMiddleware::requirePermission('contacts:manage'); // Creating contacts requires specific permission
+        AuthMiddleware::requirePermission('contacts:manage'); // Creating contacts requires specific permission
         break;
     case 'PUT':
         AuthMiddleware::requireLogin(); 

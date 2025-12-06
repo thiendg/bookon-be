@@ -16,27 +16,25 @@ class SettingController
      */
     public function listSettings()
     {
-        // Pagination
+        // Pagination (match BookController flow)
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-        $offset = ($page - 1) * $limit;
+        $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 10;
 
         // Filtering
         $filters = [];
         if (isset($_GET['key'])) {
             $filters['setting_key LIKE'] = '%' . $_GET['key'] . '%';
         }
-        // Add more filters as needed
 
-        $settings = $this->settingModel->findAll($filters, $limit, $offset);
-        $totalSettings = $this->settingModel->count($filters);
+        // Ordering (optional)
+        $orderBy = [];
+        if (isset($_GET['sortBy']) && isset($_GET['sortOrder'])) {
+            $orderBy[$_GET['sortBy']] = $_GET['sortOrder'];
+        }
 
-        Response::success([
-            'settings' => $settings,
-            'total' => $totalSettings,
-            'page' => $page,
-            'limit' => $limit
-        ], 'Settings retrieved successfully.');
+        $result = $this->settingModel->findPage($page, $pageSize, $filters, $orderBy);
+
+        Response::success($result, 'Settings retrieved successfully.');
     }
 
     /**
@@ -65,7 +63,8 @@ class SettingController
      */
     public function createSetting()
     {
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Accept form-data (`$_POST`) or JSON body
+        $data = !empty($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true);
 
         // Basic validation
         if (empty($data['setting_key']) || !isset($data['setting_value'])) {
@@ -84,8 +83,9 @@ class SettingController
         $data['created_at'] = $currentTime;
         $data['updated_at'] = $currentTime;
 
-        if ($newSettingId = $this->settingModel->create($data)) {
-            $newSetting = $this->settingModel->find($newSettingId);
+        if ($this->settingModel->create($data)) {
+            // For settings, primary key is `setting_key`
+            $newSetting = $this->settingModel->findOne(['setting_key' => $data['setting_key']]);
             Response::success(['setting' => $newSetting], 'Setting created successfully.', 201);
         } else {
             Response::error('Failed to create setting.', 500);
@@ -98,7 +98,7 @@ class SettingController
      */
     public function updateSetting($id)
     {
-        $existingSetting = null;
+        // Fetch existing by key (settings primary key is `setting_key`)
         if (is_numeric($id)) {
             $existingSetting = $this->settingModel->find($id);
         } else {
@@ -110,7 +110,8 @@ class SettingController
             return;
         }
 
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Accept form-data (`$_POST`) or JSON body
+        $data = !empty($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true);
 
         if (empty($data)) {
             Response::error('No data provided for update', 400);
@@ -125,11 +126,11 @@ class SettingController
             }
         }
 
-        // Set updated_at timestamp
-        $data['updated_at'] = time();
+        // Use the setting_key as the identifier for update
+        $identifier = $existingSetting['setting_key'];
 
-        if ($this->settingModel->update($existingSetting['id'], $data)) {
-            $updatedSetting = $this->settingModel->find($existingSetting['id']);
+        if ($this->settingModel->update($identifier, $data)) {
+            $updatedSetting = $this->settingModel->findOne(['setting_key' => $identifier]);
             Response::success(['setting' => $updatedSetting], 'Setting updated successfully.');
         } else {
             Response::error('Failed to update setting.', 500);
@@ -154,7 +155,10 @@ class SettingController
             return;
         }
 
-        if ($this->settingModel->delete($existingSetting['id'])) {
+        // Use the primary key `setting_key` to delete
+        $identifier = $existingSetting['setting_key'];
+
+        if ($this->settingModel->delete($identifier)) {
             Response::success(null, 'Setting deleted successfully.');
         } else {
             Response::error('Failed to delete setting.', 500);
