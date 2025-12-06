@@ -18,8 +18,12 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Get the ID from the query string, which is set by the main API router
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
+if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+    $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+}
 // Apply middleware based on method
+@file_put_contents(__DIR__ . '/book.log', date('c') . 'METHOD:' . $method . PHP_EOL, FILE_APPEND);
+@file_put_contents(__DIR__ . '/book.log', date('c') . 'SERVER:' . $_SERVER . PHP_EOL, FILE_APPEND);
 switch ($method) {
     case 'GET':
         // Check for special 'select' action
@@ -37,7 +41,7 @@ switch ($method) {
         AuthMiddleware::requirePermission('books:create'); // Creating books requires specific permission
         break;
     case 'PUT':
-        AuthMiddleware::requirePermission('books:edit'); // Updating books requires specific permission
+        AuthMiddleware::requirePermission('books:update'); // Updating books requires specific permission
         break;
     case 'DELETE':
         AuthMiddleware::requirePermission('books:delete'); // Deleting books requires specific permission

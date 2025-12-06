@@ -145,7 +145,6 @@ class BookController
 
         // Book data from POST fields (for PUT with form-data)
         $bookData = $_POST;
-
         // Basic validation for book data
         $errors = [];
         if (empty($bookData['title'])) {
