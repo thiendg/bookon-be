@@ -27,15 +27,15 @@ switch ($method) {
         break;
     case 'POST':
         AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('orders:manage'); // Creating orders requires specific permission
+        AuthMiddleware::requirePermission('orders:create'); // Creating orders requires specific permission
         break;
     case 'PUT':
         AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('orders:manage'); // Updating orders requires specific permission
+        AuthMiddleware::requirePermission('orders:update'); // Updating orders requires specific permission
         break;
     case 'DELETE':
         AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('orders:manage'); // Deleting orders requires specific permission
+        AuthMiddleware::requirePermission('orders:delete'); // Deleting orders requires specific permission
         break;
     case 'OPTIONS':
         // Allow preflight requests without authentication
@@ -45,6 +45,7 @@ switch ($method) {
         Response::error('Method Not Allowed', 405);
         exit();
 }
+
 
 // Route the request to the appropriate file
 $routePath = __DIR__ . '/routes/' . strtolower($method) . '.php';
