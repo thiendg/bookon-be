@@ -29,7 +29,6 @@ class UserController
             $filters['role_id'] = $_GET['role_id'];
         }
 
-
         // Sorting
         $orderBy = [];
         if (isset($_GET['sortBy'])) {
