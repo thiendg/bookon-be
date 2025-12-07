@@ -9,12 +9,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     Response::error('Method not allowed', 405);
 }
 
-AuthMiddleware::requireLogin();
+$authenticatedUser = AuthMiddleware::getAuthenticatedUser();
 
-$authenticatedUser = $_SERVER['authenticated_user'];
-
-Response::success([
-    'authenticated' => true,
-    'user' => $authenticatedUser,
-    'auth_method' => 'session'
-]);
+if ($authenticatedUser) {
+    Response::success([
+        'authenticated' => true,
+        'user' => $authenticatedUser,
+        'auth_method' => 'session'
+    ]);
+} else {
+    Response::success([
+        'authenticated' => false,
+        'user' => null
+    ]);
+}

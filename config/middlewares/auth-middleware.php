@@ -84,4 +84,40 @@ class AuthMiddleware
         Response::forbidden('Access denied. Insufficient role.');
         exit();
     }
+
+    /**
+     * Attempts to get the authenticated user data without forcing a login or terminating the script.
+     * Returns user data if authenticated, null otherwise.
+     *
+     * @return array|null The authenticated user data, or null if not authenticated.
+     */
+    public static function getAuthenticatedUser()
+    {
+        AppSession::start();
+        if (!AppSession::isAuthenticated()) {
+            return null;
+        }
+
+        $userId = AppSession::getUserId();
+
+        $userModel = new UserModel();
+        $roleModel = new RoleModel();
+
+        if (!$user = $userModel->find($userId)) {
+            AppSession::destroy(); // Session is invalid, destroy it.
+            return null;
+        }
+
+        $userData = $user;
+        if (isset($userData['role_id'])) {
+            $role = $roleModel->find($userData['role_id']);
+            if ($role) {
+                $userData['role_name'] = $role['name'];
+                $userData['permissions'] = json_decode($role['permissions'], true);
+            }
+        }
+
+        unset($userData['password_hash']);
+        return $userData;
+    }
 }
