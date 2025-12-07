@@ -1,5 +1,4 @@
 <?php
-// Load environment variables
 require_once __DIR__ . '/../../utils/env-loader.php';
 loadEnv(__DIR__ . '/../../.env');
 
@@ -35,7 +34,6 @@ class Database
             mysqli_ssl_set($mysqli, NULL, NULL, $ssl_ca, NULL, NULL);
 
             if (!mysqli_real_connect($mysqli, $host, $username, $password, $db_name, (int)$port, NULL, MYSQLI_CLIENT_SSL)) {
-                // Provide a more detailed error message for debugging
                 $connect_error = mysqli_connect_error();
                 $connect_errno = mysqli_connect_errno();
                 die(json_encode([

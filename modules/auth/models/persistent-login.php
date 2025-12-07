@@ -1,13 +1,12 @@
 <?php
 require_once __DIR__ . '/../../../config/databases/base-model.php';
-require_once __DIR__ . '/../../../utils/token_generator.php'; // For token generation and verification
+require_once __DIR__ . '/../../../utils/token_generator.php';
 
 class PersistentLoginModel extends BaseModel
 {
     protected $tableName = 'persistent_logins';
 
-    // Remember me expiration (30 days)
-    const EXPIRY_TIME = 2592000; // 30 days in seconds
+    const EXPIRY_TIME = 7200;
 
     /**
      * Generates a new persistent login token and saves it to the database.
@@ -16,9 +15,8 @@ class PersistentLoginModel extends BaseModel
      */
     public function generateToken($userId)
     {
-        // Generate selector and validator
         $tokens = TokenGenerator::generatePersistentToken();
-        
+
         $data = [
             'user_id' => $userId,
             'selector' => $tokens['selector'],
@@ -28,7 +26,6 @@ class PersistentLoginModel extends BaseModel
         ];
 
         if ($this->create($data)) {
-            // Return combined token for cookie
             return TokenGenerator::combinePersistentToken($tokens['selector'], $tokens['validator']);
         }
 
@@ -42,29 +39,24 @@ class PersistentLoginModel extends BaseModel
      */
     public function verify($combinedToken)
     {
-        // Split token into selector and validator
         $parts = TokenGenerator::splitPersistentToken($combinedToken);
-        
+
         if (!$parts) {
             return false;
         }
 
-        // Find by selector
         $persistentLogin = $this->findOne(['selector' => $parts['selector']]);
 
         if (!$persistentLogin) {
             return false;
         }
 
-        // Check if expired
         if ($persistentLogin['expires_at'] < time()) {
-            $this->delete($persistentLogin[$this->primaryKey]); // Delete expired token
+            $this->delete($persistentLogin[$this->primaryKey]);
             return false;
         }
 
-        // Verify validator
         if (!TokenGenerator::verify($parts['validator'], $persistentLogin['validator_hash'])) {
-            // Possible attack - delete all tokens for this user
             $this->deleteWhere(['user_id' => $persistentLogin['user_id']]);
             return false;
         }
@@ -80,10 +72,8 @@ class PersistentLoginModel extends BaseModel
      */
     public function refresh($userId, $oldSelector)
     {
-        // Delete old token
         $this->deleteWhere(['selector' => $oldSelector]);
-        
-        // Generate new token
+
         return $this->generateToken($userId);
     }
 
@@ -113,6 +103,6 @@ class PersistentLoginModel extends BaseModel
      */
     public function cleanExpired()
     {
-        return $this->deleteWhere(['expires_at <' => time()]); // Assuming BaseModel can handle '<' in filter
+        return $this->deleteWhere(['expires_at <' => time()]);
     }
 }

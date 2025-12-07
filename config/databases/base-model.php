@@ -199,9 +199,6 @@ class BaseModel
         $orderByClause = $this->_buildOrderByClause($orderBy, $this->tableName);
 
         $sql = "SELECT " . $selectClause . " FROM `{$this->tableName}`" . $whereClause . $orderByClause;
-        // DEBUG: log built SQL and params for troubleshooting (temporary)
-        error_log("[DEBUG SQL - findAll] " . $sql . " | params: " . json_encode($params));
-        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] " . $sql . " | params: " . json_encode($params) . PHP_EOL, FILE_APPEND);
         $stmt = $this->conn->prepare($sql);
         if (!empty($params)) {
             $stmt->bind_param($types, ...$params);
@@ -225,7 +222,6 @@ class BaseModel
         $types = '';
         $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
 
-        // Get total records count
         $countSql = "SELECT COUNT(*) as total FROM `{$this->tableName}`" . $whereClause;
         $stmt = $this->conn->prepare($countSql);
         if (!empty($params)) {
@@ -234,21 +230,18 @@ class BaseModel
         $stmt->execute();
         $totalItems = $stmt->get_result()->fetch_assoc()['total'];
 
-        // Calculate pagination details
         $totalPages = ceil($totalItems / $pageSize);
         $offset = ($page - 1) * $pageSize;
 
-        // Get paginated data
         $selectClause = $this->_buildSelectClause($selectedColumns, $this->tableName);
         $orderByClause = $this->_buildOrderByClause($orderBy, $this->tableName);
         $dataSql = "SELECT " . $selectClause . " FROM `{$this->tableName}`" . $whereClause . $orderByClause . " LIMIT ? OFFSET ?";
 
         $dataStmt = $this->conn->prepare($dataSql);
-        // We need to rebuild params for the data query
         $dataParams = $params;
         $dataParams[] = $pageSize;
         $dataParams[] = $offset;
-        $dataTypes = $types . 'ii'; // Add types for LIMIT and OFFSET
+        $dataTypes = $types . 'ii';
         $dataStmt->bind_param($dataTypes, ...$dataParams);
         $dataStmt->execute();
         $data = $dataStmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -276,11 +269,8 @@ class BaseModel
         $columns = implode(", ", array_map(function ($col) {
             return "`$col`";
         }, array_keys($data)));
-        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] Data to insert: " . json_encode($data) . PHP_EOL, FILE_APPEND);
         $placeholders = implode(", ", array_fill(0, count($data), '?'));
         $sql = "INSERT INTO `{$this->tableName}` ($columns) VALUES ($placeholders)";
-        // Log the SQL with the actual parameter values that will be bound.
-        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] " . $sql . " | params: " . json_encode(array_values($data)) . PHP_EOL, FILE_APPEND);
         $stmt = $this->conn->prepare($sql);
         $types = str_repeat('s', count($data));
         $stmt->bind_param($types, ...array_values($data));
@@ -320,7 +310,6 @@ class BaseModel
         $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
 
         $sql = "UPDATE `{$this->tableName}` SET " . implode(", ", $setClauses) . $whereClause;
-        @file_put_contents(__DIR__ . '/sql_debug.log', date('c') . " [findAll] " . $sql . " | params: " . json_encode($params) . PHP_EOL, FILE_APPEND);
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param($types, ...$params);
 
@@ -349,7 +338,7 @@ class BaseModel
         $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
 
         if (empty($whereClause)) {
-            return false; // Safety: Do not allow deleting all records without a WHERE clause
+            return false;
         }
 
         $sql = "DELETE FROM `{$this->tableName}`" . $whereClause;
@@ -369,8 +358,6 @@ class BaseModel
     {
         $params = [];
         $types = '';
-        // Note: _buildWhereClause assumes simple filters directly on the main table for getSelectOptions
-        // Need to ensure $this->tableName is correctly passed if filters use qualified names
         $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
 
         $sql = "SELECT `{$valueColumn}`, `{$labelColumn}` FROM `{$this->tableName}`" . $whereClause;
