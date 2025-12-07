@@ -24,9 +24,6 @@ if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
-        // Settings might be publicly readable, but for consistency with other modules, require login for now
-        AuthMiddleware::requireLogin();
-        AuthMiddleware::requirePermission('settings:manage'); // Specific permission for reading settings
         break;
     case 'POST':
         AuthMiddleware::requirePermission('settings:manage'); // Creating settings requires specific permission
