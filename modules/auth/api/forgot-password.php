@@ -54,7 +54,7 @@ if ($token) {
     }
     $appBaseUrl = $_ENV['APP_BASE_URL'] ?? 'http://localhost'; // Fallback
 
-    $resetLink = $appBaseUrl . '/modules/auth/api/reset-password.php?token=' . $token; // Assuming a frontend route for reset
+    $resetLink = $appBaseUrl . '/reset-password?token=' . $token; // Frontend route for reset
     
     // Prepare data for template
     $templateData = [

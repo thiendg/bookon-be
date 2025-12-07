@@ -61,7 +61,7 @@ $userData = [
     'full_name' => $data['full_name'],
     'status' => 'unverified', // Default status
     'avatar_url' => 'default_avatar.png', // Default avatar
-    'role_id' => $data['role_id'] ?? null, // Allow setting role_id if provided, otherwise null
+    'role_id' => 2, // Default role_id to 2 (customer)
     'phone_number' => $data['phone_number'] ?? null,
     'address' => $data['address'] ?? null,
 ];
