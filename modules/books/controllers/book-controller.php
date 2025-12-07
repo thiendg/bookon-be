@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/book.php';
 require_once __DIR__ . '/../../../utils/response.php';
-require_once __DIR__ . '/../../../utils/file-uploader.php'; // File Uploader utility
+require_once __DIR__ . '/../../../utils/file-uploader.php';
 
 class BookController
 {
@@ -14,16 +14,11 @@ class BookController
         $this->fileUploader = new FileUploader();
     }
 
-    /**
-     * Handles listing all books with pagination, filtering, and sorting.
-     */
     public function listBooks()
     {
-        // Pagination
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 10;
 
-        // Filtering
         $filters = [];
         if (isset($_GET['category_id'])) {
             $filters['books.category_id'] = (int)$_GET['category_id'];
@@ -31,15 +26,18 @@ class BookController
         if (isset($_GET['search'])) {
             $filters['books.title LIKE'] = '%' . $_GET['search'] . '%';
         }
-        // Add more filters as needed
+        if (isset($_GET['min_price']) && is_numeric($_GET['min_price'])) {
+            $filters['books.price >='] = (float)$_GET['min_price'];
+        }
+        if (isset($_GET['max_price']) && is_numeric($_GET['max_price'])) {
+            $filters['books.price <='] = (float)$_GET['max_price'];
+        }
 
-        // Ordering
         $orderBy = [];
         if (isset($_GET['sortBy']) && isset($_GET['sortOrder'])) {
             $orderBy[$_GET['sortBy']] = $_GET['sortOrder'];
         }
 
-        // If client requests sales data, use the specialized query
         if (isset($_GET['withSales']) && ($_GET['withSales'] === '1' || strtolower($_GET['withSales']) === 'true')) {
             $result = $this->bookModel->getBooksWithSales($page, $pageSize, $filters, $orderBy);
         } else {
@@ -49,10 +47,6 @@ class BookController
         Response::success($result, 'Books retrieved successfully.');
     }
 
-    /**
-     * Handles getting a single book by ID.
-     * @param int $id The book ID.
-     */
     public function getBook($id)
     {
         if (!is_numeric($id)) {
@@ -69,15 +63,10 @@ class BookController
         }
     }
 
-    /**
-     * Handles creating a new book.
-     */
     public function createBook()
     {
-        // Book data from POST fields
         $bookData = $_POST;
 
-        // Basic validation for book data
         $errors = [];
         if (empty($bookData['title'])) {
             $errors['title'] = 'Book title is required.';
@@ -88,23 +77,20 @@ class BookController
         if (!isset($bookData['price']) || !is_numeric($bookData['price']) || $bookData['price'] < 0) {
             $errors['price'] = 'Valid price is required.';
         }
-        // Add more validation rules as needed
 
         if (!empty($errors)) {
             Response::validationError($errors);
         }
 
         $imagePaths = [];
-        // Handle multiple image uploads if 'images' field is present in $_FILES
         if (isset($_FILES['images']) && is_array($_FILES['images'])) {
-            $uploadedImages = $this->fileUploader->uploadMultiple($_FILES['images'], 'books'); // Upload to 'public/uploads/books'
+            $uploadedImages = $this->fileUploader->uploadMultiple($_FILES['images'], 'books');
             if (!empty($this->fileUploader->getErrors())) {
                 Response::error('Image upload failed: ' . implode(', ', $this->fileUploader->getErrors()), 400);
             }
             $imagePaths = $uploadedImages;
         }
 
-        // Prepare book data for database
         $bookDbData = [
             'title' => $bookData['title'],
             'description' => $bookData['description'],

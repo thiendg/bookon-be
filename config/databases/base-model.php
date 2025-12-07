@@ -5,7 +5,7 @@ class BaseModel
 {
     protected $conn;
     protected $tableName;
-    protected $primaryKey = 'id'; // Default primary key
+    protected $primaryKey = 'id';
 
     public function __construct()
     {
@@ -26,7 +26,7 @@ class BaseModel
         if (empty($columns)) {
             return $tablePrefix ? "`{$tablePrefix}`.*" : "*";
         }
-        
+
         $prefix = $tablePrefix ? "`{$tablePrefix}`." : "";
         return implode(", ", array_map(function ($col) use ($prefix) {
             return $prefix . "`$col`";
@@ -47,12 +47,45 @@ class BaseModel
             return "";
         }
 
-        $prefix = $tablePrefix ? "`{$tablePrefix}`." : "";
         $whereClauses = [];
+        // Regex to match column_name [operator]
+        // Examples: "column_name", "column_name >=", "column_name LIKE"
+        // Also supports table.column_name
+        $operatorPattern = '/^([a-zA-Z0-9_]+\.?\b[a-zA-Z0-9_]+)\s*(<>|!=|<=|>=|<|>|LIKE|=)?$/i';
+
         foreach ($filters as $key => $value) {
-            $whereClauses[] = $prefix . "`$key` = ?";
+            $column = $key;
+            $operator = '='; // Default operator
+
+            // Extract column and operator if present
+            if (preg_match($operatorPattern, $key, $matches)) {
+                $column = trim($matches[1]);
+                if (isset($matches[2]) && !empty($matches[2])) {
+                    $operator = strtoupper(trim($matches[2]));
+                }
+            }
+
+            // Handle table prefix for the column
+            // If the column already has a dot (e.g., 'books.title'), don't add tablePrefix
+            if ($tablePrefix && strpos($column, '.') === false) {
+                $column = "`{$tablePrefix}`.`{$column}`";
+            } else {
+                $parts = explode('.', $column);
+                $column = implode('.', array_map(fn($part) => "`{$part}`", $parts));
+            }
+
+
+            $whereClauses[] = "{$column} {$operator} ?";
             $params[] = $value;
-            $types .= 's'; // Assume string for simplicity
+
+            // Determine type for bind_param
+            if (is_int($value)) {
+                $types .= 'i';
+            } elseif (is_float($value)) {
+                $types .= 'd';
+            } else { // Default to string
+                $types .= 's';
+            }
         }
         return " WHERE " . implode(" AND ", $whereClauses);
     }
@@ -84,7 +117,9 @@ class BaseModel
             // escape column name and add prefix
             if (strpos($col, '.') !== false) {
                 $sub = explode('.', $col);
-                $sub = array_map(function($p){ return "`".trim($p,'` ')."`"; }, $sub);
+                $sub = array_map(function ($p) {
+                    return "`" . trim($p, '` ') . "`";
+                }, $sub);
                 $colEscaped = implode('.', $sub);
             } else {
                 $colEscaped = "`" . trim($col, '` ') . "`";
@@ -115,11 +150,11 @@ class BaseModel
         $selectClause = $this->_buildSelectClause($selectedColumns, $this->tableName);
         $sql = "SELECT " . $selectClause . " FROM `{$this->tableName}` WHERE `{$this->primaryKey}` = ?";
         $stmt = $this->conn->prepare($sql);
-        
+
         // Dynamically determine bind_param type
         $pkType = is_int($id) ? 'i' : 's';
         $stmt->bind_param($pkType, $id);
-        
+
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_assoc();
@@ -207,7 +242,7 @@ class BaseModel
         $selectClause = $this->_buildSelectClause($selectedColumns, $this->tableName);
         $orderByClause = $this->_buildOrderByClause($orderBy, $this->tableName);
         $dataSql = "SELECT " . $selectClause . " FROM `{$this->tableName}`" . $whereClause . $orderByClause . " LIMIT ? OFFSET ?";
-        
+
         $dataStmt = $this->conn->prepare($dataSql);
         // We need to rebuild params for the data query
         $dataParams = $params;
@@ -281,7 +316,7 @@ class BaseModel
             $params[] = $value;
             $types .= 's';
         }
-        
+
         $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
 
         $sql = "UPDATE `{$this->tableName}` SET " . implode(", ", $setClauses) . $whereClause;
