@@ -18,7 +18,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Get the ID from the query string, which is set by the main API router
 $id = $_GET['id'] ?? null;
-@file_put_contents(__DIR__ . '/routes/settings.log', date('c') . 'API called with method: ' . $method . ' and id: ' . $id . PHP_EOL, FILE_APPEND);
 if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
     $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
 }
@@ -26,7 +25,7 @@ if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
 switch ($method) {
     case 'GET':
         // Settings might be publicly readable, but for consistency with other modules, require login for now
-        AuthMiddleware::requireLogin(); 
+        AuthMiddleware::requireLogin();
         AuthMiddleware::requirePermission('settings:manage'); // Specific permission for reading settings
         break;
     case 'POST':
