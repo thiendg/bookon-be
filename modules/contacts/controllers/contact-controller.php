@@ -74,8 +74,7 @@ class ContactController
         // Set timestamps
         $currentTime = time();
         $data['created_at'] = $currentTime;
-        $data['updated_at'] = $currentTime;
-        $data['status'] = 'pending'; // Default status for new contacts
+        $data['status'] = 'new'; // Default status for new contacts
 
         if ($newContactId = $this->contactModel->create($data)) {
             $newContact = $this->contactModel->find($newContactId);
@@ -108,9 +107,6 @@ class ContactController
             Response::error('No data provided for update', 400);
             return;
         }
-
-        // Set updated_at timestamp
-        $data['updated_at'] = time();
 
         if ($this->contactModel->update($id, $data)) {
             $updatedContact = $this->contactModel->find($id);

@@ -28,15 +28,15 @@ switch ($method) {
     case 'POST':
         // Contact form submissions should be publicly accessible
         // AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('contacts:manage'); // Creating contacts requires specific permission
+        AuthMiddleware::requirePermission('contacts:create'); // Creating contacts requires specific permission
         break;
     case 'PUT':
         AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('contacts:manage'); // Updating contacts requires specific permission
+        AuthMiddleware::requirePermission('contacts:update'); // Updating contacts requires specific permission
         break;
     case 'DELETE':
         AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('contacts:manage'); // Deleting contacts requires specific permission
+        AuthMiddleware::requirePermission('contacts:delete'); // Deleting contacts requires specific permission
         break;
     case 'OPTIONS':
         // Allow preflight requests without authentication
