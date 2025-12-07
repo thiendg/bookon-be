@@ -88,7 +88,7 @@ if ($userModel->create($userData)) {
         }
         $appBaseUrl = $_ENV['APP_BASE_URL'] ?? 'http://localhost'; // Fallback
 
-        $verificationLink = $appBaseUrl . '/modules/auth/api/verify-email.php?token=' . $token;
+        $verificationLink = $appBaseUrl . '/verify-email?token=' . $token;
         
         // Prepare data for template
         $templateData = [
