@@ -2,6 +2,14 @@
 // Include CORS configuration early
 require_once __DIR__ . '/../../../utils/cors.php';
 
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+
+// Log that script started
+error_log("read.php: Script started");
+
 // Set universal headers (excluding CORS which is handled by cors.php)
 header("Content-Type: application/json; charset=UTF-8");
 
