@@ -378,4 +378,28 @@ class BaseModel
         }
         return $options;
     }
+
+    /**
+     * Counts the number of records matching the given filters.
+     * @param array $filters Associative array of filters.
+     * @return int The count of matching records.
+     */
+    public function count($filters = [])
+    {
+        $params = [];
+        $types = '';
+        $whereClause = $this->_buildWhereClause($filters, $params, $types, $this->tableName);
+
+        $sql = "SELECT COUNT(*) as total FROM `{$this->tableName}`" . $whereClause;
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        
+        return (int)$result['total'];
+    }
 }
