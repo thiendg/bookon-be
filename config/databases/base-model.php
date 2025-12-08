@@ -51,7 +51,7 @@ class BaseModel
         // Regex to match column_name [operator]
         // Examples: "column_name", "column_name >=", "column_name LIKE"
         // Also supports table.column_name
-        $operatorPattern = '/^([a-zA-Z0-9_]+\.?\b[a-zA-Z0-9_]+)\s*(<>|!=|<=|>=|<|>|LIKE|=)?$/i';
+        $operatorPattern = '/^([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)?)\s*(<>|!=|<=|>=|<|>|LIKE|NOT LIKE|IN|NOT IN|IS|IS NOT|=)?$/i';
 
         foreach ($filters as $key => $value) {
             $column = $key;
