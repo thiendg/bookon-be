@@ -15,9 +15,17 @@ $userController = new UserController();
 
 // Get the request method
 $method = $_SERVER['REQUEST_METHOD'];
+// Handle method override for PUT requests sent as POST with form-data
+if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+    $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+}
 
 // Get the ID from the query string, which is set by the main API router
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+    $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+}
+
 
 // Apply middleware based on method
 switch ($method) {

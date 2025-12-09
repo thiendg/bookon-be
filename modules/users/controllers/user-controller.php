@@ -1,14 +1,17 @@
 <?php
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../../../utils/response.php';
+require_once __DIR__ . '/../../../utils/file-uploader.php'; // Include FileUploader
 
 class UserController
 {
     private $userModel;
+    private $fileUploader; // Add property for FileUploader
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->fileUploader = new FileUploader(); // Instantiate FileUploader
     }
 
     /**
@@ -108,11 +111,33 @@ class UserController
             return;
         }
 
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = [];
+        $contentType = isset($_SERVER['CONTENT_TYPE']) ? trim($_SERVER['CONTENT_TYPE']) : '';
 
-        if (empty($data)) {
+        // Handle based on Content-Type
+        if (strpos($contentType, 'application/json') !== false) {
+            $data = json_decode(file_get_contents('php://input'), true);
+        } else { // Assumes multipart/form-data
+            $data = $_POST;
+        }
+        
+        if (empty($data) && empty($_FILES)) {
             Response::error('No data provided for update', 400);
             return;
+        }
+
+        // Handle avatar upload
+        if (isset($_FILES['avatar'])) {
+            $uploadPath = $this->fileUploader->upload($_FILES['avatar'], 'avatars');
+            
+            if (!empty($this->fileUploader->getErrors())) {
+                Response::error('Avatar upload failed: ' . implode(', ', $this->fileUploader->getErrors()), 400);
+                return;
+            }
+            // Add the new avatar path to the data to be updated
+            if ($uploadPath) {
+                $data['avatar_url'] = $uploadPath;
+            }
         }
 
         // Prevent changing email to one that already exists
@@ -129,8 +154,7 @@ class UserController
         if ($result) {
             Response::success(null, 'User updated successfully');
         } else {
-            // This can also mean the update didn't change any rows
-            Response::success(null, 'User update operation completed. No changes detected.');
+            Response::error('Failed to update user.', 500);
         }
     }
 
@@ -163,3 +187,4 @@ class UserController
         Response::success($options, 'User select options retrieved successfully.');
     }
 }
+
