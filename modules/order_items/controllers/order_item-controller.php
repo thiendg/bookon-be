@@ -1,14 +1,17 @@
 <?php
 require_once __DIR__ . '/../models/order_item.php';
+require_once __DIR__ . '/../../books/models/book.php'; // Import BookModel
 require_once __DIR__ . '/../../../utils/response.php';
 
 class OrderItemController
 {
     private $orderItemModel;
+    private $bookModel; // Add BookModel property
 
     public function __construct()
     {
         $this->orderItemModel = new OrderItemModel();
+        $this->bookModel = new BookModel(); // Instantiate BookModel
     }
 
     /**
@@ -94,6 +97,17 @@ class OrderItemController
 
         if ($newId = $this->orderItemModel->create($data)) {
             $newOrderItem = $this->orderItemModel->find($newId);
+
+            // Decrement book stock
+            $book = $this->bookModel->find($data['book_id']);
+            if ($book) {
+                $newStock = $book['stock_quantity'] - $data['quantity'];
+                // Prevent negative stock. A more robust solution would check stock before order creation.
+                if ($newStock < 0) $newStock = 0; 
+
+                $this->bookModel->update($data['book_id'], ['stock_quantity' => $newStock]);
+            }
+
             Response::success(['order_item' => $newOrderItem], 'Order item created successfully.', 201);
         } else {
             Response::error('Failed to create order item.', 500);
