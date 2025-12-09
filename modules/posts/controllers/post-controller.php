@@ -82,9 +82,6 @@ class PostController
         if (empty($data['content'])) {
             $errors['content'] = 'Content is required.';
         }
-        if (empty($data['user_id']) || !is_numeric($data['user_id'])) {
-            $errors['user_id'] = 'Valid user_id is required.';
-        }
 
         if (!empty($errors)) {
             Response::validationError($errors);
@@ -93,15 +90,6 @@ class PostController
 
         // Handle thumbnail upload
         $imagePath = null;
-        if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
-            $uploaded = $this->fileUploader->upload($_FILES['thumbnail'], 'posts');
-            if ($uploaded === false) {
-                Response::error('Thumbnail upload failed: ' . implode(', ', $this->fileUploader->getErrors()), 400);
-                return;
-            }
-            $imagePath = $uploaded;
-        }
-
         if (isset($_FILES['thumbnail_image']) && $_FILES['thumbnail_image']['error'] === UPLOAD_ERR_OK) {
             $uploaded = $this->fileUploader->upload($_FILES['thumbnail_image'], 'posts');
             if ($uploaded === false) {
@@ -161,21 +149,51 @@ class PostController
             return;
         }
 
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = [];
+        $contentType = isset($_SERVER['CONTENT_TYPE']) ? trim($_SERVER['CONTENT_TYPE']) : '';
 
-        if (empty($data)) {
+        if (strpos($contentType, 'application/json') !== false) {
+            $data = json_decode(file_get_contents('php://input'), true);
+        } else { 
+            $data = $_POST;
+        }
+
+        if (empty($data) && empty($_FILES)) {
             Response::error('No data provided for update', 400);
             return;
         }
 
-        // Set updated_at timestamp
-        $data['updated_at'] = time();
+        if (isset($data['slug'])) {
+            $existingPostWithSlug = $this->postModel->findOne(['slug' => $data['slug']]);
+            if ($existingPostWithSlug && $existingPostWithSlug['id'] != $id) {
+                Response::error('This slug is already in use by another post.', 409);
+                return;
+            }
+        }
 
-        if ($this->postModel->update($id, $data)) {
-            $updatedPost = $this->postModel->find($id);
-            Response::success(['post' => $updatedPost], 'Post updated successfully.');
+        $imagePath = null;
+        if (isset($_FILES['thumbnail_image']) && $_FILES['thumbnail_image']['error'] === UPLOAD_ERR_OK) {
+            $uploaded = $this->fileUploader->upload($_FILES['thumbnail_image'], 'posts');
+            if ($uploaded === false) {
+                Response::error('Thumbnail upload failed: ' . implode(', ', $this->fileUploader->getErrors()), 400);
+                return;
+            }
+            $imagePath = $uploaded;
+        }
+
+        if ($imagePath !== null) {
+            $data['thumbnail_image_url'] = $imagePath;
+        }
+
+        $data['updated_at'] = time();
+        
+        $affectedRows = $this->postModel->update($id, $data);
+
+        if ($affectedRows === -1) {
+            Response::error('Failed to update post due to a database error.', 500);
         } else {
-            Response::error('Failed to update post.', 500);
+            $updatedPost = $this->postModel->find($id);
+            Response::success(['post' => $updatedPost], 'Post update processed successfully.');
         }
     }
 

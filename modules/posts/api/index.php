@@ -18,12 +18,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Get the ID from the query string, which is set by the main API router
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+if ($method === 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+    $method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+}
 
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
         // Posts might be publicly readable, but for consistency with users/books, require login for now
- 
+
 
         break;
     case 'POST':
