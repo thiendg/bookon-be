@@ -68,17 +68,37 @@ class OrderController
     {
         $data = json_decode(file_get_contents('php://input'), true);
 
-        // Basic validation
-        if (empty($data['user_id']) || empty($data['total_amount'])) {
-            Response::error('Missing required fields: user_id, total_amount', 400);
+        // More accurate validation based on DB schema
+        $errors = [];
+        if (!isset($data['total_amount'])) {
+            $errors['total_amount'] = 'Total amount is required.';
+        }
+        if (empty($data['customer_name'])) {
+            $errors['customer_name'] = 'Customer name is required.';
+        }
+        if (empty($data['customer_email'])) {
+            $errors['customer_email'] = 'Customer email is required.';
+        }
+        if (empty($data['customer_phone'])) {
+            $errors['customer_phone'] = 'Customer phone is required.';
+        }
+        if (empty($data['shipping_address'])) {
+            $errors['shipping_address'] = 'Shipping address is required.';
+        }
+
+        if (!empty($errors)) {
+            Response::validationError($errors, 'Missing required fields.');
             return;
         }
 
-        // Set timestamps
-        $currentTime = time();
-        $data['created_at'] = $currentTime;
-        $data['updated_at'] = $currentTime;
-        $data['status'] = 'pending'; // Default status for new orders
+        // Ensure user_id is null if not provided, allowing guest checkout
+        if (empty($data['user_id'])) {
+            $data['user_id'] = null;
+        }
+
+        // Set timestamps and default status
+        $data['created_at'] = time();
+        $data['status'] = 'pending';
 
         if ($newOrderId = $this->orderModel->create($data)) {
             $newOrder = $this->orderModel->find($newOrderId);
@@ -113,13 +133,18 @@ class OrderController
         }
 
         // Set updated_at timestamp
-        $data['updated_at'] = time();
+        // $data['updated_at'] = time();
 
-        if ($this->orderModel->update($id, $data)) {
+        $affectedRows = $this->orderModel->update($id, $data);
+
+        if ($affectedRows > 0) {
             $updatedOrder = $this->orderModel->find($id);
-            Response::success(['order' => $updatedOrder], 'Order updated successfully.');
+            Response::success(['order' => $updatedOrder], 'Order status updated successfully.');
+        } elseif ($affectedRows === 0) {
+            $updatedOrder = $this->orderModel->find($id);
+            Response::success(['order' => $updatedOrder], 'Order status was already set. No changes made.');
         } else {
-            Response::error('Failed to update order.', 500);
+            Response::error('A database error occurred while updating the order.', 500);
         }
     }
 

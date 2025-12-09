@@ -22,19 +22,19 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 // Apply middleware based on method
 switch ($method) {
     case 'GET':
-        AuthMiddleware::requireLogin(); 
+        AuthMiddleware::requireLogin();
         AuthMiddleware::requirePermission('order_items:read'); // Specific permission for reading order items
         break;
     case 'POST':
-        AuthMiddleware::requireLogin(); 
-        AuthMiddleware::requirePermission('order_items:manage'); // Creating order items requires specific permission
+        // AuthMiddleware::requireLogin(); 
+        // AuthMiddleware::requirePermission('order_items:manage'); // Creating order items requires specific permission
         break;
     case 'PUT':
-        AuthMiddleware::requireLogin(); 
+        AuthMiddleware::requireLogin();
         AuthMiddleware::requirePermission('order_items:manage'); // Updating order items requires specific permission
         break;
     case 'DELETE':
-        AuthMiddleware::requireLogin(); 
+        AuthMiddleware::requireLogin();
         AuthMiddleware::requirePermission('order_items:manage'); // Deleting order items requires specific permission
         break;
     case 'OPTIONS':
